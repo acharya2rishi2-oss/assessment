@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Primary Curriculum Learning Portal (Grades 1–5)</title>
+    <!-- Devanagari & Clean UI Fonts matching 1MLA1 & 1MLA2 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sky-top: #bae6fd;
+            --sky-mid: #e0f2fe;
+            --sun-warm: #fef3c7;
+            --surface: #ffffff;
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --primary-shadow: #1e3a8a;
+            --accent: #f59e0b;
+            --accent-shadow: #b45309;
+            --success: #15803d;
+            --success-bg: #dcfce7;
+            --text-dark: #0f172a;
+            --text-muted: #475569;
+            --border-light: #cbd5e1;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', 'Mukta', sans-serif;
+            background: radial-gradient(circle at 12% 15%, #fef08a 0%, transparent 28%),
+                        linear-gradient(160deg, var(--sky-top) 0%, var(--sky-mid) 50%, var(--sun-warm) 100%);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .master-card {
+            width: 100%;
+            max-width: 780px;
+            background: var(--surface);
+            border-radius: 28px;
+            border: 4px solid #ffffff;
+            box-shadow: 0 22px 48px -12px rgba(15, 23, 42, 0.22), 0 7px 0 #cbd5e1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(90deg, #1d4ed8 0%, #2563eb 55%, #0284c7 100%);
+            color: #ffffff;
+            padding: 22px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 14px;
+            border-bottom: 4px solid #1e3a8a;
+        }
+
+        .header-title-group {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .logo-badge {
+            width: 54px;
+            height: 54px;
+            background: #fde047;
+            color: #713f12;
+            border: 3px solid #ffffff;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.65rem;
+            box-shadow: 0 3px 0 #ca8a04;
+            flex-shrink: 0;
+        }
+
+        header h1 {
+            font-size: clamp(1.35rem, 3vw, 1.8rem);
+            font-weight: 800;
+            line-height: 1.15;
+        }
+
+        header p {
+            font-size: 0.95rem;
+            opacity: 0.92;
+            margin-top: 2px;
+        }
+
+        .code-preview-pill {
+            background: rgba(15, 23, 42, 0.28);
+            border: 2px solid rgba(255, 255, 255, 0.45);
+            padding: 8px 16px;
+            border-radius: 999px;
+            font-weight: 800;
+            font-size: 0.95rem;
+            letter-spacing: 0.4px;
+        }
+
+        .code-preview-pill span {
+            color: #fde047;
+            font-family: monospace;
+            font-size: 1.05rem;
+        }
+
+        /* Main Form Body */
+        .form-body {
+            padding: 26px 28px 30px;
+        }
+
+        .dropdown-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+        }
+
+        @media (max-width: 600px) {
+            .dropdown-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .field-group label {
+            font-weight: 800;
+            font-size: 0.98rem;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .select-wrapper {
+            position: relative;
+        }
+
+        select {
+            width: 100%;
+            appearance: none;
+            background: #f8fafc;
+            border: 3px solid var(--border-light);
+            border-radius: 16px;
+            padding: 13px 42px 13px 16px;
+            font-family: inherit;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+        }
+
+        select:hover {
+            border-color: #93c5fd;
+            background: #ffffff;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+        }
+
+        .select-wrapper::after {
+            content: "▼";
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.8rem;
+            color: var(--primary);
+            pointer-events: none;
+        }
+
+        /* Live Summary Box */
+        .selection-summary {
+            margin-top: 22px;
+            background: #eff6ff;
+            border: 2.5px solid #93c5fd;
+            border-radius: 18px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .summary-details {
+            font-size: 0.98rem;
+            font-weight: 700;
+            color: #1e3a8a;
+        }
+
+        .status-tag {
+            padding: 5px 14px;
+            border-radius: 999px;
+            font-size: 0.88rem;
+            font-weight: 800;
+        }
+
+        .status-tag.ready {
+            background: var(--success-bg);
+            color: var(--success);
+            border: 2px solid #22c55e;
+        }
+
+        .status-tag.pending {
+            background: #fef3c7;
+            color: #92400e;
+            border: 2px solid #f59e0b;
+        }
+
+        /* Quick Launch Chips for Uploaded Files */
+        .quick-links {
+            margin-top: 16px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 700;
+        }
+
+        .quick-chip {
+            background: #f1f5f9;
+            border: 2px solid #cbd5e1;
+            color: #1e293b;
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-family: inherit;
+            font-size: 0.88rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .quick-chip:hover {
+            background: #dbeafe;
+            border-color: #3b82f6;
+            color: #1d4ed8;
+        }
+
+        /* Tactile Next Button */
+        .action-row {
+            margin-top: 24px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .btn-next {
+            width: 100%;
+            font-family: inherit;
+            font-size: 1.2rem;
+            font-weight: 800;
+            padding: 15px 28px;
+            border-radius: 18px;
+            border: none;
+            background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
+            color: #ffffff;
+            box-shadow: 0 5px 0 var(--primary-shadow);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: transform 0.12s, box-shadow 0.12s;
+        }
+
+        .btn-next:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 0 var(--primary-shadow);
+        }
+
+        .btn-next:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 var(--primary-shadow);
+        }
+
+        /* Coming Soon Modal Overlay */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.22s ease;
+        }
+
+        .modal-backdrop.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 460px;
+            border-radius: 26px;
+            border: 4px solid #fde047;
+            padding: 28px 24px;
+            text-align: center;
+            box-shadow: 0 24px 50px rgba(0, 0, 0, 0.3);
+            transform: scale(0.92);
+            transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .modal-backdrop.active .modal-card {
+            transform: scale(1);
+        }
+
+        .modal-icon {
+            font-size: 3.4rem;
+            margin-bottom: 8px;
+        }
+
+        .modal-card h2 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: #1e3a8a;
+            margin-bottom: 8px;
+        }
+
+        .modal-card p {
+            font-size: 1.02rem;
+            color: #334155;
+            line-height: 1.55;
+            font-weight: 600;
+            margin-bottom: 18px;
+        }
+
+        .modal-file-badge {
+            display: inline-block;
+            background: #fef3c7;
+            border: 2px dashed #d97706;
+            color: #92400e;
+            font-family: monospace;
+            font-size: 1rem;
+            font-weight: 800;
+            padding: 6px 14px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn-modal-next {
+            width: 100%;
+            font-family: inherit;
+            font-size: 1.1rem;
+            font-weight: 800;
+            padding: 13px 22px;
+            border-radius: 16px;
+            border: none;
+            background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%);
+            color: #ffffff;
+            box-shadow: 0 4px 0 var(--accent-shadow);
+            cursor: pointer;
+            transition: transform 0.12s;
+        }
+
+        .btn-modal-next:active {
+            transform: translateY(2px);
+        }
+    </style>
+</head>
+<body>
+
+<div class="master-card">
+    <header>
+        <div class="header-title-group">
+            <div class="logo-badge" aria-hidden="true">🎓</div>
+            <div>
+                <h1>Interactive Learning Portal</h1>
+                <p>Select Grade, Subject, Theme &amp; Learning Achievement</p>
+            </div>
+        </div>
+        <div class="code-preview-pill">
+            Target File: <span id="fileCodeBadge">1MLA1.html</span>
+        </div>
+    </header>
+
+    <main class="form-body">
+        <div class="dropdown-grid">
+            <!-- Dropdown 1: Grade 1-5 -->
+            <div class="field-group">
+                <label for="gradeSelect">1. Select Grade (कक्षा)</label>
+                <div class="select-wrapper">
+                    <select id="gradeSelect">
+                        <option value="1">Grade 1 (कक्षा १)</option>
+                        <option value="2">Grade 2 (कक्षा २)</option>
+                        <option value="3">Grade 3 (कक्षा ३)</option>
+                        <option value="4">Grade 4 (कक्षा ४)</option>
+                        <option value="5">Grade 5 (कक्षा ५)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Dropdown 2: Subject -->
+            <div class="field-group">
+                <label for="subjectSelect">2. Select Subject (विषय)</label>
+                <div class="select-wrapper">
+                    <select id="subjectSelect">
+                        <option value="M">Mathematics (गणित)</option>
+                        <option value="S">Serophero (मेरो सेरोफेरो)</option>
+                        <option value="E">English (अङ्ग्रेजी)</option>
+                        <option value="N">Nepali (नेपाली)</option>
+                        <option value="LC">Local Curriculum (स्थानीय पाठ्यक्रम)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Dropdown 3: Theme 1-30 -->
+            <div class="field-group">
+                <label for="themeSelect">3. Select Theme (1–30)</label>
+                <div class="select-wrapper">
+                    <select id="themeSelect"></select>
+                </div>
+            </div>
+
+            <!-- Dropdown 4: Learning Achievement 1-30 -->
+            <div class="field-group">
+                <label for="laSelect">4. Learning Achievement (1–30)</label>
+                <div class="select-wrapper">
+                    <select id="laSelect"></select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Selection & Availability Status -->
+        <div class="selection-summary">
+            <div class="summary-details" id="summaryText">
+                Grade 1 • Mathematics • Theme 1 • Learning Achievement 1
+            </div>
+            <div class="status-tag ready" id="availabilityBadge">
+                ✅ Available (1MLA1.html)
+            </div>
+        </div>
+
+        <!-- Quick Select Shortcuts for Uploaded Activities -->
+        <div class="quick-links">
+            <span>Uploaded Activities:</span>
+            <button type="button" class="quick-chip" data-grade="1" data-subject="M" data-theme="1" data-la="1">
+                1MLA1 — स्थानिक ज्ञान खेल
+            </button>
+            <button type="button" class="quick-chip" data-grade="1" data-subject="M" data-theme="1" data-la="2">
+                1MLA2 — देवनागरी अङ्क खेल (१-१०)
+            </button>
+        </div>
+
+        <!-- Next Button -->
+        <div class="action-row">
+            <button type="button" class="btn-next" id="nextBtn">
+                <span>Next ➡️</span>
+            </button>
+        </div>
+    </main>
+</div>
+
+<!-- Coming Soon Modal -->
+<div class="modal-backdrop" id="comingSoonModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-card">
+        <div class="modal-icon">🚧📚</div>
+        <h2 id="modalTitle">Coming Soon!</h2>
+        <p id="modalMessage">
+            The interactive learning activity for this class and learning achievement has not been uploaded yet.
+        </p>
+        <div class="modal-file-badge" id="modalMissingFile">1MLA3.html</div>
+        <button type="button" class="btn-modal-next" id="modalCloseBtn">
+            Next (Choose Another) ➡️
+        </button>
+    </div>
+</div>
+
+<script>
+    // Registry of uploaded HTML files in the directory
+    const UPLOADED_FILES = new Set([
+        '1MLA1.html',
+        '1MLA2.html'
+    ]);
+
+    const SUBJECT_NAMES = {
+        M: 'Mathematics',
+        S: 'Serophero',
+        E: 'English',
+        N: 'Nepali',
+        LC: 'Local Curriculum'
+    };
+
+    const gradeSelect = document.getElementById('gradeSelect');
+    const subjectSelect = document.getElementById('subjectSelect');
+    const themeSelect = document.getElementById('themeSelect');
+    const laSelect = document.getElementById('laSelect');
+    const fileCodeBadge = document.getElementById('fileCodeBadge');
+    const summaryText = document.getElementById('summaryText');
+    const availabilityBadge = document.getElementById('availabilityBadge');
+    const nextBtn = document.getElementById('nextBtn');
+
+    const comingSoonModal = document.getElementById('comingSoonModal');
+    const modalMessage = document.getElementById('modalMessage');
+    const modalMissingFile = document.getElementById('modalMissingFile');
+    const modalCloseBtn = document.getElementById('modalCloseBtn');
+
+    // Populate Theme (1-30) and Learning Achievement (1-30) dropdowns
+    function populateRangeDropdown(selectEl, prefix) {
+        for (let i = 1; i <= 30; i++) {
+            const option = document.createElement('option');
+            option.value = String(i);
+            option.textContent = `${prefix} ${i}`;
+            selectEl.appendChild(option);
+        }
+    }
+
+    populateRangeDropdown(themeSelect, 'Theme');
+    populateRangeDropdown(laSelect, 'Learning Achievement');
+
+    // Construct target filename according to denotation: e.g., 1MLA1.html
+    function getTargetFileName() {
+        const grade = gradeSelect.value;
+        const subjectCode = subjectSelect.value;
+        const la = laSelect.value;
+        return `${grade}${subjectCode}LA${la}.html`;
+    }
+
+    // Update UI summary and status badge on selection change
+    function updateSelectionState() {
+        const grade = gradeSelect.value;
+        const subjectCode = subjectSelect.value;
+        const subjectName = SUBJECT_NAMES[subjectCode];
+        const theme = themeSelect.value;
+        const la = laSelect.value;
+        const fileName = getTargetFileName();
+
+        fileCodeBadge.textContent = fileName;
+        summaryText.textContent = `Grade ${grade} • ${subjectName} • Theme ${theme} • Learning Achievement ${la}`;
+
+        if (UPLOADED_FILES.has(fileName)) {
+            availabilityBadge.className = 'status-tag ready';
+            availabilityBadge.textContent = `✅ Uploaded (${fileName})`;
+        } else {
+            availabilityBadge.className = 'status-tag pending';
+            availabilityBadge.textContent = `⏳ Not Uploaded Yet`;
+        }
+    }
+
+    // Handle Next button click
+    async function handleNextClick() {
+        const grade = gradeSelect.value;
+        const subjectName = SUBJECT_NAMES[subjectSelect.value];
+        const theme = themeSelect.value;
+        const la = laSelect.value;
+        const targetFile = getTargetFileName();
+
+        // 1. Check known uploaded registry first (works even on local file:// protocol)
+        if (UPLOADED_FILES.has(targetFile)) {
+            window.location.href = targetFile;
+            return;
+        }
+
+        // 2. If hosted on a web server, also verify dynamically in case new files were added
+        if (window.location.protocol.startsWith('http')) {
+            try {
+                const response = await fetch(targetFile, { method: 'HEAD' });
+                if (response.ok) {
+                    window.location.href = targetFile;
+                    return;
+                }
+            } catch (err) {
+                // Fall through to Coming Soon modal
+            }
+        }
+
+        // 3. Not uploaded yet -> Show Coming Soon message
+        modalMessage.innerHTML = `
+            <strong>Coming Soon!</strong><br>
+            Content for <strong>Grade ${grade} ${subjectName}</strong> (Theme ${theme}, Learning Achievement ${la}) is not uploaded yet.
+        `;
+        modalMissingFile.textContent = `File: ${targetFile}`;
+        comingSoonModal.classList.add('active');
+    }
+
+    // Event listeners
+    [gradeSelect, subjectSelect, themeSelect, laSelect].forEach(el => {
+        el.addEventListener('change', updateSelectionState);
+    });
+
+    nextBtn.addEventListener('click', handleNextClick);
+
+    modalCloseBtn.addEventListener('click', () => {
+        comingSoonModal.classList.remove('active');
+    });
+
+    comingSoonModal.addEventListener('click', (e) => {
+        if (e.target === comingSoonModal) {
+            comingSoonModal.classList.remove('active');
+        }
+    });
+
+    // Quick shortcut buttons for 1MLA1 and 1MLA2
+    document.querySelectorAll('.quick-chip').forEach(btn => {
+        btn.addEventListener('click', () => {
+            gradeSelect.value = btn.dataset.grade;
+            subjectSelect.value = btn.dataset.subject;
+            themeSelect.value = btn.dataset.theme;
+            laSelect.value = btn.dataset.la;
+            updateSelectionState();
+        });
+    });
+
+    // Initialize state on load
+    updateSelectionState();
+</script>
+
+</body>
+</html>

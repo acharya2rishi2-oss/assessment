@@ -1,0 +1,1970 @@
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>देवनागरी अङ्क खेल (१ देखि १० सम्म) - Devanagari Number Explorer</title>
+    <!-- Clear Devanagari Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@600;700;800&family=Noto+Sans+Devanagari:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* =====================================================================
+           1. STORYBOOK DESIGN TOKENS & GLOBAL STYLES
+           ===================================================================== */
+        :root {
+            --sky-top: #fde68a;
+            --sky-mid: #e0f2fe;
+            --sky-bottom: #dcfce7;
+            --surface: #ffffff;
+            --primary: #2563eb;
+            --primary-shadow: #1e3a8a;
+            --purple: #7c3aed;
+            --purple-shadow: #4c1d95;
+            --teal: #0d9488;
+            --teal-shadow: #115e59;
+            --amber: #f59e0b;
+            --amber-shadow: #b45309;
+            --success: #15803d;
+            --success-bg: #dcfce7;
+            --success-border: #22c55e;
+            --error: #b91c1c;
+            --error-bg: #fee2e2;
+            --error-border: #ef4444;
+            --text-dark: #0f172a;
+            --text-muted: #475569;
+            --radius-2xl: 28px;
+            --radius-xl: 20px;
+            --radius-lg: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Mukta', 'Noto Sans Devanagari', sans-serif;
+            background: radial-gradient(circle at 12% 12%, #fef08a 0%, transparent 30%),
+                        linear-gradient(155deg, var(--sky-top) 0%, var(--sky-mid) 52%, var(--sky-bottom) 100%);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            overflow-x: hidden;
+        }
+
+        /* =====================================================================
+           2. MAIN GAME CONTAINER & HEADER
+           ===================================================================== */
+        .app-shell {
+            width: 100%;
+            max-width: 980px;
+            background: var(--surface);
+            border-radius: var(--radius-2xl);
+            border: 4px solid #ffffff;
+            box-shadow: 0 20px 45px -10px rgba(15, 23, 42, 0.22), 0 6px 0 #cbd5e1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        header {
+            background: linear-gradient(90deg, #0f766e 0%, #0284c7 52%, #2563eb 100%);
+            color: #ffffff;
+            padding: 12px 20px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            border-bottom: 4px solid #0f172a26;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-badge {
+            width: 50px;
+            height: 50px;
+            background: #fde047;
+            color: #713f12;
+            border: 3px solid #ffffff;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.55rem;
+            font-weight: 800;
+            box-shadow: 0 3px 0 #ca8a04;
+        }
+
+        .brand h1 {
+            font-size: clamp(1.3rem, 3vw, 1.75rem);
+            font-weight: 800;
+            line-height: 1.15;
+            text-shadow: 0 2px 4px rgba(15, 23, 42, 0.25);
+        }
+
+        .brand p {
+            font-size: 0.92rem;
+            opacity: 0.95;
+            font-weight: 600;
+        }
+
+        .hud-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .hud-pill {
+            background: rgba(15, 23, 42, 0.25);
+            border: 2px solid rgba(255, 255, 255, 0.45);
+            padding: 5px 14px;
+            border-radius: 999px;
+            font-weight: 800;
+            font-size: 0.98rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .auto-read-btn {
+            background: #fef08a;
+            color: #713f12;
+            border: 2px solid #ffffff;
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-family: inherit;
+            font-weight: 800;
+            font-size: 0.92rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 3px 0 #ca8a04;
+            transition: transform 0.12s, background 0.2s;
+        }
+
+        .auto-read-btn.off {
+            background: rgba(255, 255, 255, 0.22);
+            color: #ffffff;
+            box-shadow: none;
+        }
+
+        .auto-read-btn:active {
+            transform: translateY(2px);
+        }
+
+        /* =====================================================================
+           3. FOUR-SKILL CURRICULUM STEPPER BAR
+           ===================================================================== */
+        .skills-nav {
+            background: #f1f5f9;
+            padding: 10px 16px;
+            border-bottom: 2px solid #e2e8f0;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        @media (max-width: 640px) {
+            .skills-nav {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .skill-tab {
+            background: #ffffff;
+            border: 2.5px solid #cbd5e1;
+            border-radius: 14px;
+            padding: 6px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 800;
+            font-size: 0.95rem;
+            color: #475569;
+            transition: all 0.2s ease;
+        }
+
+        .skill-tab.active {
+            background: #eff6ff;
+            border-color: #2563eb;
+            color: #1e3a8a;
+            box-shadow: 0 3px 0 #93c5fd;
+            transform: translateY(-1px);
+        }
+
+        .skill-tab.passed {
+            background: #dcfce7;
+            border-color: #22c55e;
+            color: #14532d;
+        }
+
+        .skill-tab.needs-help {
+            background: #fef3c7;
+            border-color: #f59e0b;
+            color: #78350f;
+        }
+
+        /* =====================================================================
+           4. QUESTION BANNER & NEPALI READER
+           ===================================================================== */
+        .question-card {
+            margin: 12px 18px 8px;
+            background: linear-gradient(180deg, #eff6ff 0%, #dbeafe 100%);
+            border: 3px solid #93c5fd;
+            border-radius: var(--radius-xl);
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .question-text-area {
+            flex: 1;
+            min-width: 240px;
+        }
+
+        .concept-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #1d4ed8;
+            color: #ffffff;
+            font-size: 0.9rem;
+            font-weight: 800;
+            padding: 3px 14px;
+            border-radius: 999px;
+            margin-bottom: 5px;
+        }
+
+        .question-heading {
+            font-size: clamp(1.25rem, 2.8vw, 1.68rem);
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1.38;
+        }
+
+        .q-word {
+            display: inline-block;
+            padding: 0 3px;
+            border-radius: 6px;
+            transition: background-color 0.15s, color 0.15s, transform 0.15s;
+        }
+
+        .q-word.speaking {
+            background-color: #fde047;
+            color: #713f12;
+            transform: scale(1.06);
+        }
+
+        .read-btn {
+            font-family: inherit;
+            background: linear-gradient(180deg, #8b5cf6 0%, #7c3aed 100%);
+            color: #ffffff;
+            border: 3px solid #ffffff;
+            border-radius: 18px;
+            padding: 10px 18px;
+            font-size: 1.02rem;
+            font-weight: 800;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 0 var(--purple-shadow);
+            transition: transform 0.12s, box-shadow 0.12s;
+            white-space: nowrap;
+        }
+
+        .read-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 var(--purple-shadow);
+        }
+
+        .read-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 var(--purple-shadow);
+        }
+
+        .read-btn.is-speaking {
+            background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%);
+            box-shadow: 0 4px 0 #92400e;
+        }
+
+        .sound-bars {
+            display: inline-flex;
+            align-items: flex-end;
+            gap: 2px;
+            height: 16px;
+        }
+
+        .sound-bars span {
+            width: 3px;
+            height: 6px;
+            background: #ffffff;
+            border-radius: 2px;
+        }
+
+        .read-btn.is-speaking .sound-bars span:nth-child(1) { animation: soundWave 0.45s infinite alternate; }
+        .read-btn.is-speaking .sound-bars span:nth-child(2) { animation: soundWave 0.45s 0.15s infinite alternate; }
+        .read-btn.is-speaking .sound-bars span:nth-child(3) { animation: soundWave 0.45s 0.3s infinite alternate; }
+
+        @keyframes soundWave {
+            0% { height: 5px; }
+            100% { height: 16px; }
+        }
+
+        /* =====================================================================
+           5. INTERACTIVE STAGE (SVG SCENES, NUMBER CARDS, READING & WRITING)
+           ===================================================================== */
+        .stage-container {
+            padding: 6px 18px;
+            position: relative;
+        }
+
+        /* Counting & Comparing Visual Frame */
+        .visual-board {
+            width: 100%;
+            border-radius: var(--radius-xl);
+            border: 4px solid #64748b;
+            background: #f8fafc;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 3px 12px rgba(15, 23, 42, 0.08);
+        }
+
+        .svg-box {
+            width: 100%;
+            aspect-ratio: 900 / 340;
+            max-height: 340px;
+            min-height: 230px;
+        }
+
+        .svg-box svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* Interactive Tappable Items for Counting */
+        .count-item {
+            cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.2s;
+            transform-box: fill-box;
+            transform-origin: center;
+        }
+
+        .count-item:hover {
+            transform: scale(1.08);
+            filter: drop-shadow(0 0 12px rgba(37, 99, 235, 0.75));
+        }
+
+        .count-item.counted {
+            filter: drop-shadow(0 0 10px rgba(22, 163, 74, 0.7));
+        }
+
+        /* Compare Groups */
+        .compare-group {
+            cursor: pointer;
+            transition: transform 0.2s ease, filter 0.2s ease;
+            transform-box: fill-box;
+            transform-origin: center;
+        }
+
+        .compare-group:hover {
+            transform: scale(1.03);
+            filter: drop-shadow(0 0 14px rgba(37, 99, 235, 0.8));
+        }
+
+        /* Live Counting Counter Strip + Numeral Choice Keypad */
+        .counting-toolbar {
+            background: #ffffff;
+            border-top: 3px solid #cbd5e1;
+            padding: 12px 16px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .live-count-pill {
+            background: #fef9c3;
+            border: 3px solid #eab308;
+            color: #713f12;
+            padding: 6px 16px;
+            border-radius: 16px;
+            font-size: 1.15rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .live-count-num {
+            background: #ca8a04;
+            color: #ffffff;
+            padding: 1px 12px;
+            border-radius: 10px;
+            font-size: 1.35rem;
+        }
+
+        .num-choices {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .num-card-btn {
+            font-family: inherit;
+            min-width: 68px;
+            height: 64px;
+            padding: 0 16px;
+            font-size: 1.85rem;
+            font-weight: 800;
+            color: #1e3a8a;
+            background: linear-gradient(180deg, #ffffff 0%, #eff6ff 100%);
+            border: 3px solid #3b82f6;
+            border-radius: 16px;
+            box-shadow: 0 4px 0 #1d4ed8;
+            cursor: pointer;
+            transition: transform 0.12s, box-shadow 0.12s, background 0.15s;
+        }
+
+        .num-card-btn:hover {
+            transform: translateY(-2px);
+            background: #dbeafe;
+            box-shadow: 0 6px 0 #1d4ed8;
+        }
+
+        .num-card-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #1d4ed8;
+        }
+
+        .num-card-btn.correct {
+            background: #dcfce7;
+            border-color: #16a34a;
+            color: #14532d;
+            box-shadow: 0 4px 0 #15803d;
+        }
+
+        .num-card-btn.wrong {
+            background: #fee2e2;
+            border-color: #dc2626;
+            color: #7f1d1d;
+            box-shadow: 0 4px 0 #b91c1c;
+            animation: shakeTryAgain 0.4s ease;
+        }
+
+        /* =====================================================================
+           6. READING & WRITING WORKSPACE + TEACHER ASSESSMENT BOX
+           ===================================================================== */
+        .rw-workspace {
+            display: grid;
+            grid-template-columns: 1.35fr 1fr;
+            gap: 14px;
+            align-items: stretch;
+        }
+
+        @media (max-width: 780px) {
+            .rw-workspace {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .student-task-panel {
+            background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 100%);
+            border: 3px solid #f59e0b;
+            border-radius: var(--radius-xl);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .task-instruction-box {
+            background: #ffffff;
+            border: 2px dashed #d97706;
+            border-radius: 14px;
+            padding: 10px 14px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #78350f;
+            line-height: 1.45;
+        }
+
+        /* Flashcard Grid for Reading Module */
+        .reading-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(105px, 1fr));
+            gap: 10px;
+        }
+
+        .flash-num-card {
+            background: #ffffff;
+            border: 3px solid #3b82f6;
+            border-radius: 18px;
+            padding: 10px 8px;
+            text-align: center;
+            box-shadow: 0 4px 0 #93c5fd;
+            transition: transform 0.15s;
+        }
+
+        .flash-num-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .flash-digit {
+            display: block;
+            font-size: 2.35rem;
+            font-weight: 800;
+            color: #1d4ed8;
+            line-height: 1.1;
+        }
+
+        .flash-word {
+            display: block;
+            font-size: 1.12rem;
+            font-weight: 800;
+            color: #334155;
+            margin-top: 2px;
+        }
+
+        /* Writing Module Slate + Target Numbers */
+        .writing-targets-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .target-badge {
+            background: #ffffff;
+            border: 2.5px solid #0284c7;
+            color: #0369a1;
+            font-size: 1.35rem;
+            font-weight: 800;
+            padding: 3px 14px;
+            border-radius: 12px;
+        }
+
+        .slate-wrapper {
+            background: #1e293b;
+            border: 4px solid #78350f;
+            border-radius: 16px;
+            padding: 8px;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .slate-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #f8fafc;
+            font-size: 0.92rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            padding: 0 4px;
+        }
+
+        .slate-tools {
+            display: flex;
+            gap: 6px;
+        }
+
+        .slate-tool-btn {
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 800;
+            padding: 3px 10px;
+            border-radius: 8px;
+            border: 1.5px solid #94a3b8;
+            background: #334155;
+            color: #ffffff;
+            cursor: pointer;
+        }
+
+        .slate-tool-btn:hover {
+            background: #475569;
+        }
+
+        #writingCanvas {
+            width: 100%;
+            height: 155px;
+            background: #0f172a;
+            border-radius: 10px;
+            display: block;
+            cursor: crosshair;
+            touch-action: none;
+        }
+
+        /* Dedicated Teacher Assessment Box (शिक्षक मूल्याङ्कन बाकस) */
+        .teacher-box {
+            background: linear-gradient(180deg, #f0fdf4 0%, #dcfce7 100%);
+            border: 3.5px solid #16a34a;
+            border-radius: var(--radius-xl);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 12px;
+            box-shadow: 0 6px 0 #86efac;
+        }
+
+        .teacher-box-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 2px solid #86efac;
+            padding-bottom: 8px;
+        }
+
+        .teacher-box-header h3 {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #14532d;
+        }
+
+        .teacher-desc {
+            font-size: 0.96rem;
+            font-weight: 700;
+            color: #166534;
+            line-height: 1.4;
+        }
+
+        .teacher-mark-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+        }
+
+        .mark-option-btn {
+            font-family: inherit;
+            width: 100%;
+            padding: 11px 14px;
+            border-radius: 14px;
+            border: 3px solid #cbd5e1;
+            background: #ffffff;
+            color: #1e293b;
+            font-size: 1.02rem;
+            font-weight: 800;
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.15s ease;
+        }
+
+        .mark-option-btn:hover {
+            transform: translateY(-1px);
+            border-color: #64748b;
+        }
+
+        .mark-option-btn.selected-pass {
+            background: #16a34a;
+            border-color: #14532d;
+            color: #ffffff;
+            box-shadow: 0 4px 0 #14532d;
+        }
+
+        .mark-option-btn.selected-fail {
+            background: #dc2626;
+            border-color: #7f1d1d;
+            color: #ffffff;
+            box-shadow: 0 4px 0 #7f1d1d;
+        }
+
+        .teacher-note-input {
+            font-family: inherit;
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 12px;
+            border: 2px solid #86efac;
+            background: #ffffff;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #0f172a;
+            user-select: text;
+        }
+
+        .teacher-note-input:focus {
+            outline: none;
+            border-color: #15803d;
+        }
+
+        /* =====================================================================
+           7. BOTTOM FEEDBACK BAR & CONTROLS
+           ===================================================================== */
+        .bottom-bar {
+            padding: 10px 18px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .feedback-box {
+            flex: 1;
+            min-width: 240px;
+            padding: 11px 16px;
+            border-radius: var(--radius-lg);
+            background: #f8fafc;
+            border: 3px solid #cbd5e1;
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.25s ease;
+        }
+
+        .feedback-box.success {
+            background: var(--success-bg);
+            border-color: var(--success-border);
+            color: var(--success);
+        }
+
+        .feedback-box.error {
+            background: var(--error-bg);
+            border-color: var(--error-border);
+            color: var(--error);
+        }
+
+        .tactile-btn {
+            font-family: inherit;
+            font-size: 1.08rem;
+            font-weight: 800;
+            padding: 11px 22px;
+            border-radius: var(--radius-lg);
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.12s, box-shadow 0.12s, opacity 0.2s;
+        }
+
+        .btn-next {
+            background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
+            color: #ffffff;
+            box-shadow: 0 4px 0 var(--primary-shadow);
+        }
+
+        .btn-next:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 var(--primary-shadow);
+        }
+
+        .btn-next:active:not(:disabled) {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 var(--primary-shadow);
+        }
+
+        .tactile-btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        @keyframes shakeTryAgain {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            50% { transform: translateX(8px); }
+            75% { transform: translateX(-5px); }
+        }
+
+        /* =====================================================================
+           8. START & FINAL EVALUATION REPORT OVERLAYS
+           ===================================================================== */
+        .overlay-screen {
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.98);
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 22px;
+            text-align: center;
+            overflow-y: auto;
+        }
+
+        .overlay-screen.hidden {
+            display: none;
+        }
+
+        .hero-title {
+            font-size: clamp(1.7rem, 3.8vw, 2.4rem);
+            font-weight: 800;
+            color: #1e3a8a;
+            margin-bottom: 6px;
+        }
+
+        .hero-desc {
+            font-size: 1.08rem;
+            color: #334155;
+            max-width: 680px;
+            margin-bottom: 18px;
+            line-height: 1.5;
+            font-weight: 600;
+        }
+
+        .levels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(195px, 1fr));
+            gap: 12px;
+            width: 100%;
+            max-width: 780px;
+            margin-bottom: 22px;
+        }
+
+        .level-card {
+            background: #f8fafc;
+            border: 3px solid #cbd5e1;
+            border-radius: 18px;
+            padding: 12px 14px;
+            text-align: left;
+            box-shadow: 0 4px 0 #e2e8f0;
+        }
+
+        .level-card strong {
+            display: block;
+            color: #0f766e;
+            font-size: 1.06rem;
+            margin-bottom: 2px;
+        }
+
+        .level-card span {
+            font-size: 0.94rem;
+            color: #334155;
+            font-weight: 700;
+        }
+
+        /* Report Card Table */
+        .report-box {
+            width: 100%;
+            max-width: 760px;
+            background: #f8fafc;
+            border: 3px solid #94a3b8;
+            border-radius: 20px;
+            padding: 16px 18px;
+            margin-bottom: 18px;
+            text-align: left;
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            border-bottom: 2px solid #cbd5e1;
+            padding-bottom: 10px;
+            margin-bottom: 12px;
+        }
+
+        .score-badge {
+            background: #fde047;
+            color: #713f12;
+            border: 2.5px solid #ca8a04;
+            font-weight: 800;
+            font-size: 1.18rem;
+            padding: 5px 18px;
+            border-radius: 999px;
+        }
+
+        .rubric-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.94rem;
+            background: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .rubric-table th, .rubric-table td {
+            border: 1.5px solid #cbd5e1;
+            padding: 7px 11px;
+        }
+
+        .rubric-table th {
+            background: #e2e8f0;
+            font-weight: 800;
+        }
+
+        .rubric-table tr.active-row {
+            background: #dcfce7;
+            color: #14532d;
+            font-weight: 800;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            pointer-events: none;
+            z-index: 40;
+            animation: confettiFall 1.7s ease-out forwards;
+        }
+
+        @keyframes confettiFall {
+            0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(380px) rotate(720deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-shell">
+    <!-- Top Header -->
+    <header>
+        <div class="brand">
+            <div class="brand-badge" aria-hidden="true">१-१०</div>
+            <div>
+                <h1>देवनागरी अङ्क खेल (१ देखि १० सम्म)</h1>
+                <p>गन्ती, तुलना, पढाइ र लेखाइ सिकाइ तथा मूल्याङ्कन खेल</p>
+            </div>
+        </div>
+        <div class="hud-controls">
+            <div class="hud-pill" id="sessionSetHud">प्रश्न सेट #१</div>
+            <div class="hud-pill" id="stepHud">चरण १ / ६</div>
+            <div class="hud-pill">🎯 सीप: <span id="skillCountHud">०</span> / ४</div>
+            <button class="auto-read-btn" id="autoReadToggle" type="button">
+                🔊 स्वतः वाचन: चालु
+            </button>
+        </div>
+    </header>
+
+    <!-- 4 Curriculum Skills Stepper -->
+    <nav class="skills-nav" aria-label="मुख्य सिकाइ सीपहरू">
+        <div class="skill-tab active" id="tab-counting">
+            <span>१. गन्ती गर्ने</span>
+            <span id="status-counting">⏳</span>
+        </div>
+        <div class="skill-tab" id="tab-comparing">
+            <span>२. तुलना गर्ने</span>
+            <span id="status-comparing">⏳</span>
+        </div>
+        <div class="skill-tab" id="tab-reading">
+            <span>३. पढ्ने (शिक्षक)</span>
+            <span id="status-reading">⏳</span>
+        </div>
+        <div class="skill-tab" id="tab-writing">
+            <span>४. लेख्ने (शिक्षक)</span>
+            <span id="status-writing">⏳</span>
+        </div>
+    </nav>
+
+    <!-- Question Banner + Nepali Audio Reader -->
+    <section class="question-card" aria-label="प्रश्न र वाचक">
+        <div class="question-text-area">
+            <div class="concept-chip" id="conceptBadge">सीप १ • गन्ती गर्ने</div>
+            <h2 class="question-heading" id="questionHeading">रूखमा फलेका स्याउहरू एक-एक गरी छोएर गन्नुहोस्।</h2>
+        </div>
+        <button class="read-btn" id="readQuestionBtn" type="button">
+            <span>🔊 प्रश्न सुन्नुहोस्</span>
+            <span class="sound-bars" aria-hidden="true">
+                <span></span><span></span><span></span>
+            </span>
+        </button>
+    </section>
+
+    <!-- Interactive Workspace Stage -->
+    <main class="stage-container" id="stageContainer">
+        <!-- Dynamic Content Rendered Here -->
+    </main>
+
+    <!-- Bottom Feedback & Next Button -->
+    <footer class="bottom-bar">
+        <div class="feedback-box" id="statusBanner" role="status" aria-live="polite">
+            चित्रमा दिइएको कार्य पूरा गर्नुहोस्! 👆
+        </div>
+        <button class="tactile-btn btn-next" id="nextBtn" type="button" disabled>
+            अर्को चरण ➡️
+        </button>
+    </footer>
+
+    <!-- Start Welcome Overlay -->
+    <div class="overlay-screen" id="startModal">
+        <div style="font-size: 3.2rem; margin-bottom: 6px;">🔢📚✍️</div>
+        <h2 class="hero-title">देवनागरी अङ्क खेलमा स्वागत छ!</h2>
+        <p class="hero-desc">
+            यस खेलमा विद्यार्थीहरूले देवनागरी अङ्क <strong>१ देखि १० सम्म</strong> गन्ती गर्न, तुलना गर्न, पढ्न र लेख्न सिक्नेछन्। पढाइ र लेखाइ चरणमा <strong>शिक्षक मूल्याङ्कन बाकस</strong> उपलब्ध छ।
+        </p>
+
+        <div class="levels-grid">
+            <div class="level-card">
+                <strong>१. गन्ती गर्ने (Counting)</strong>
+                <span>चित्रमा वस्तुहरू छोएर १ देखि १० सम्म गन्ने र सही अङ्क छान्ने।</span>
+            </div>
+            <div class="level-card">
+                <strong>२. तुलना गर्ने (Comparing)</strong>
+                <span>दुई समूह वा अङ्कमध्ये कुन धेरै र कुन थोरै छ भनी छुट्याउने।</span>
+            </div>
+            <div class="level-card">
+                <strong>३. पढ्ने (Reading)</strong>
+                <span>विद्यार्थीले अङ्क पढेर सुनाउने र शिक्षकले बाकसमा अङ्कन गर्ने।</span>
+            </div>
+            <div class="level-card">
+                <strong>४. लेख्ने (Writing)</strong>
+                <span>विद्यार्थीले कापी वा पाटीमा अङ्क लेख्ने र शिक्षकले मूल्याङ्कन गर्ने।</span>
+            </div>
+        </div>
+
+        <button class="tactile-btn btn-next" id="startBtn" style="font-size: 1.22rem; padding: 14px 32px;">
+            खेल सुरु गर्नुहोस् 🎮
+        </button>
+    </div>
+
+    <!-- Final Curriculum Evaluation Report Overlay -->
+    <div class="overlay-screen hidden" id="reportModal">
+        <h2 class="hero-title">🏆 सिकाइ उपलब्धि मूल्याङ्कन नतिजा</h2>
+        <p class="hero-desc" id="reportSummaryLine">
+            मुख्य सिकाइ उपलब्धि: देवनागरी सङ्ख्याङ्कन पद्धतिमा १० सम्म गन्ती गर्न, पढ्न, लेख्न र तुलना गर्न।
+        </p>
+
+        <div class="report-box">
+            <div class="report-header">
+                <h3>चार मुख्य सीपहरूको विवरण</h3>
+                <span class="score-badge" id="finalPointBadge">प्राप्त अङ्क: ४ अङ्क</span>
+            </div>
+
+            <!-- Skill-by-Skill Summary Table -->
+            <table class="rubric-table" id="skillSummaryTable">
+                <thead>
+                    <tr>
+                        <th>क्र.सं.</th>
+                        <th>सिकाइ सीप</th>
+                        <th>स्थिति</th>
+                        <th>शिक्षकको कैफियत</th>
+                    </tr>
+                </thead>
+                <tbody id="skillSummaryBody"></tbody>
+            </table>
+
+            <!-- Official Curriculum Rubric Table (1 to 4 Marks) -->
+            <table class="rubric-table">
+                <thead>
+                    <tr>
+                        <th style="width: 86px;">अङ्क</th>
+                        <th>सूचक (Curriculum Evaluation Rubric)</th>
+                    </tr>
+                </thead>
+                <tbody id="rubricTableBody">
+                    <tr data-pts="4">
+                        <td><strong>४ अङ्क</strong></td>
+                        <td>देवनागरी सङ्ख्याङ्कन पद्धतिमा १० सम्म गन्ती गर्न, पढ्न, लेख्न र तुलना गर्न सकेमा।</td>
+                    </tr>
+                    <tr data-pts="3">
+                        <td><strong>३ अङ्क</strong></td>
+                        <td>देवनागरी सङ्ख्याङ्कन पद्धतिमा १० सम्म गन्ती गर्ने, पढ्ने, लेख्न र तुलना गर्नेमध्ये कुनै तीनओटा कार्य गर्न सकेमा।</td>
+                    </tr>
+                    <tr data-pts="2">
+                        <td><strong>२ अङ्क</strong></td>
+                        <td>देवनागरी सङ्ख्याङ्कन पद्धतिमा १० सम्म गन्ती गर्ने, पढ्ने, लेख्न र तुलना गर्नेमध्ये कुनै दुईओटा कार्य गर्न सकेमा।</td>
+                    </tr>
+                    <tr data-pts="1">
+                        <td><strong>१ अङ्क</strong></td>
+                        <td>देवनागरी सङ्ख्याङ्कन पद्धतिमा १० सम्म गन्ती गर्ने, पढ्ने, लेख्न र तुलना गर्नेमध्ये कुनै एउटा कार्य गर्न सकेमा।</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <button class="tactile-btn btn-next" id="restartBtn" style="font-size: 1.16rem; padding: 13px 28px;">
+            फेरि खेल्नुहोस् (नयाँ प्रश्नहरू) 🔄
+        </button>
+    </div>
+</div>
+
+<script>
+    /**
+     * =========================================================================
+     * देवनागरी अङ्क खेल (DEVANAGARI NUMBER EXPLORER UP TO 10)
+     * Non-Repeating Question Pool Edition (4 Curriculum Skills × Multiple Variants)
+     * =========================================================================
+     */
+    const NEPALI_DIGITS = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९', '१०'];
+    const NEPALI_WORDS = ['शून्य', 'एक', 'दुई', 'तीन', 'चार', 'पाँच', 'छ', 'सात', 'आठ', 'नौ', 'दश'];
+
+    function toNepaliNum(val) {
+        const d = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
+        return String(val).replace(/[0-9]/g, ch => d[Number(ch)]);
+    }
+
+    // =========================================================================
+    // 1. NEPALI AUDIO READER + WEB AUDIO SOUND EFFECTS
+    // =========================================================================
+    class NepaliAudioReader {
+        constructor() {
+            this.autoRead = true;
+            this.ctx = null;
+            this.karaokeTimer = null;
+            this.selectedVoice = null;
+
+            if ('speechSynthesis' in window) {
+                const loadVoices = () => {
+                    const voices = window.speechSynthesis.getVoices();
+                    this.selectedVoice =
+                        voices.find(v => v.lang && v.lang.toLowerCase().startsWith('ne')) ||
+                        voices.find(v => v.lang && v.lang.toLowerCase().startsWith('hi')) ||
+                        voices.find(v => v.name && /nepali|hindi|devanagari|google/i.test(v.name)) ||
+                        null;
+                };
+                loadVoices();
+                window.speechSynthesis.onvoiceschanged = loadVoices;
+            }
+        }
+
+        ensureAudioCtx() {
+            if (!this.ctx) {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (AudioCtx) this.ctx = new AudioCtx();
+            }
+            if (this.ctx && this.ctx.state === 'suspended') {
+                this.ctx.resume();
+            }
+        }
+
+        stopSpeaking() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+            if (this.karaokeTimer) {
+                clearInterval(this.karaokeTimer);
+                this.karaokeTimer = null;
+            }
+            const btn = document.getElementById('readQuestionBtn');
+            if (btn) btn.classList.remove('is-speaking');
+            document.querySelectorAll('.q-word').forEach(w => w.classList.remove('speaking'));
+        }
+
+        speakNepali(text, highlightWords = false) {
+            this.stopSpeaking();
+            const cleanText = text.replace(/\([A-Za-z\s]+\)/g, '').replace(/\s+/g, ' ').trim();
+            const btn = document.getElementById('readQuestionBtn');
+            const wordSpans = highlightWords ? Array.from(document.querySelectorAll('.q-word')) : [];
+
+            if (highlightWords && btn) btn.classList.add('is-speaking');
+
+            let wordIdx = 0;
+            if (wordSpans.length > 0) {
+                wordSpans[0].classList.add('speaking');
+                this.karaokeTimer = setInterval(() => {
+                    wordSpans.forEach(w => w.classList.remove('speaking'));
+                    wordIdx++;
+                    if (wordIdx < wordSpans.length) {
+                        wordSpans[wordIdx].classList.add('speaking');
+                    } else {
+                        clearInterval(this.karaokeTimer);
+                        this.karaokeTimer = null;
+                        if (btn) btn.classList.remove('is-speaking');
+                    }
+                }, 420);
+            }
+
+            if ('speechSynthesis' in window) {
+                try {
+                    const utterance = new SpeechSynthesisUtterance(cleanText);
+                    if (this.selectedVoice) {
+                        utterance.voice = this.selectedVoice;
+                        utterance.lang = this.selectedVoice.lang;
+                    } else {
+                        utterance.lang = 'ne-NP';
+                    }
+                    utterance.rate = 0.90;
+                    utterance.pitch = 1.08;
+
+                    utterance.onend = () => {
+                        if (this.karaokeTimer) {
+                            clearInterval(this.karaokeTimer);
+                            this.karaokeTimer = null;
+                        }
+                        wordSpans.forEach(w => w.classList.remove('speaking'));
+                        if (btn) btn.classList.remove('is-speaking');
+                    };
+                    window.speechSynthesis.speak(utterance);
+                } catch (e) {}
+            }
+        }
+
+        playTone(freqs, duration = 0.35, step = 0.08, type = 'triangle') {
+            try {
+                this.ensureAudioCtx();
+                if (!this.ctx) return;
+                const t = this.ctx.currentTime;
+                freqs.forEach((freq, i) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, t + i * step);
+                    gain.gain.setValueAtTime(0.18, t + i * step);
+                    gain.gain.exponentialRampToValueAtTime(0.001, t + i * step + duration);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(t + i * step);
+                    osc.stop(t + i * step + duration + 0.02);
+                });
+            } catch (e) {}
+        }
+
+        playSuccess() {
+            this.playTone([523.25, 659.25, 783.99, 1046.5], 0.35, 0.08, 'triangle');
+        }
+
+        playError() {
+            this.playTone([230, 175], 0.28, 0.12, 'sine');
+        }
+
+        playPop(num) {
+            const base = 400 + num * 45;
+            this.playTone([base], 0.12, 0.05, 'sine');
+        }
+
+        playFanfare() {
+            this.playTone([523.25, 659.25, 783.99, 659.25, 1046.5], 0.45, 0.12, 'triangle');
+        }
+    }
+
+    const reader = new NepaliAudioReader();
+
+    // =========================================================================
+    // 2. SVG ASSET GENERATORS (APPLE, FISH, DUCK, BIRD, FLOWER, STAR, ETC.)
+    // =========================================================================
+    function svgApple(x, y, scale = 1) {
+        return `
+            <g transform="translate(${x}, ${y}) scale(${scale})">
+                <ellipse cx="0" cy="24" rx="20" ry="6" fill="rgba(0,0,0,0.18)"/>
+                <path d="M0,-14 C-15,-20 -28,-8 -24,9 C-20,21 -9,26 0,23 C9,26 20,21 24,9 C28,-8 15,-20 0,-14 Z"
+                      fill="#ef4444" stroke="#7f1d1d" stroke-width="3"/>
+                <path d="M0,-14 Q2,-24 6,-28" fill="none" stroke="#78350f" stroke-width="3.5" stroke-linecap="round"/>
+                <path d="M2,-21 Q14,-28 19,-20 Q11,-13 2,-21 Z" fill="#22c55e" stroke="#14532d" stroke-width="2"/>
+            </g>
+        `;
+    }
+
+    function svgFish(x, y, scale = 1) {
+        return `
+            <g transform="translate(${x}, ${y}) scale(${scale})">
+                <ellipse cx="0" cy="0" rx="22" ry="14" fill="#38bdf8" stroke="#0369a1" stroke-width="3"/>
+                <polygon points="18,0 32,-11 26,0 32,11" fill="#0284c7" stroke="#0369a1" stroke-width="2.5" stroke-linejoin="round"/>
+                <polygon points="-4,-13 6,-18 2,-11" fill="#0284c7" stroke="#0369a1" stroke-width="2"/>
+                <circle cx="-11" cy="-4" r="3" fill="#0f172a"/>
+                <path d="M10,-4 Q14,0 10,4" fill="none" stroke="#0369a1" stroke-width="2" stroke-linecap="round"/>
+            </g>
+        `;
+    }
+
+    function svgDuck(x, y, scale = 1) {
+        return `
+            <g transform="translate(${x}, ${y}) scale(${scale})">
+                <ellipse cx="2" cy="10" rx="22" ry="13" fill="#fde047" stroke="#854d0e" stroke-width="3"/>
+                <circle cx="-13" cy="-6" r="12" fill="#fef08a" stroke="#854d0e" stroke-width="3"/>
+                <polygon points="-24,-6 -35,-3 -24,1" fill="#f97316" stroke="#9a3412" stroke-width="2"/>
+                <circle cx="-16" cy="-8" r="2.5" fill="#0f172a"/>
+            </g>
+        `;
+    }
+
+    function svgBird(x, y, scale = 1) {
+        return `
+            <g transform="translate(${x}, ${y}) scale(${scale})">
+                <path d="M-24,2 Q-8,-22 10,-6 Q22,-18 28,-4 Q14,8 2,12 Q-12,14 -24,2 Z"
+                      fill="#ec4899" stroke="#831843" stroke-width="3" stroke-linejoin="round"/>
+                <path d="M-4,-6 Q-14,-24 -2,-24 Q6,-18 2,-6" fill="#f472b6" stroke="#831843" stroke-width="2.5"/>
+                <polygon points="26,-5 36,-2 26,2" fill="#facc15" stroke="#854d0e" stroke-width="2"/>
+                <circle cx="18" cy="-4" r="2.5" fill="#0f172a"/>
+            </g>
+        `;
+    }
+
+    function svgFlower(x, y, scale = 1) {
+        return `
+            <g transform="translate(${x}, ${y}) scale(${scale})">
+                <line x1="0" y1="8" x2="0" y2="34" stroke="#15803d" stroke-width="4" stroke-linecap="round"/>
+                <ellipse cx="-8" cy="22" rx="8" ry="4" transform="rotate(-25 -8 22)" fill="#22c55e"/>
+                <circle cx="0" cy="-14" r="9" fill="#a855f7" stroke="#581c87" stroke-width="2.5"/>
+                <circle cx="13" cy="-4" r="9" fill="#a855f7" stroke="#581c87" stroke-width="2.5"/>
+                <circle cx="8" cy="11" r="9" fill="#a855f7" stroke="#581c87" stroke-width="2.5"/>
+                <circle cx="-8" cy="11" r="9" fill="#a855f7" stroke="#581c87" stroke-width="2.5"/>
+                <circle cx="-13" cy="-4" r="9" fill="#a855f7" stroke="#581c87" stroke-width="2.5"/>
+                <circle cx="0" cy="0" r="8" fill="#fde047" stroke="#854d0e" stroke-width="2.5"/>
+            </g>
+        `;
+    }
+
+    function svgStar(x, y, scale = 1) {
+        return `
+            <g transform="translate(${x}, ${y}) scale(${scale})">
+                <polygon points="0,-24 7,-8 24,-6 11,6 15,23 0,14 -15,23 -11,6 -24,-6 -7,-8"
+                         fill="#fde047" stroke="#ca8a04" stroke-width="3" stroke-linejoin="round"/>
+                <circle cx="-4" cy="-2" r="2" fill="#713f12"/>
+                <circle cx="4" cy="-2" r="2" fill="#713f12"/>
+            </g>
+        `;
+    }
+
+    function svgButterfly(x, y, scale = 1) {
+        return `
+            <g transform="translate(${x}, ${y}) scale(${scale})">
+                <ellipse cx="-13" cy="-7" rx="13" ry="10" transform="rotate(-20 -13 -7)" fill="#f97316" stroke="#7c2d12" stroke-width="2.5"/>
+                <ellipse cx="13" cy="-7" rx="13" ry="10" transform="rotate(20 13 -7)" fill="#f97316" stroke="#7c2d12" stroke-width="2.5"/>
+                <ellipse cx="-11" cy="9" rx="10" ry="8" transform="rotate(15 -11 9)" fill="#fbbf24" stroke="#7c2d12" stroke-width="2.5"/>
+                <ellipse cx="11" cy="9" rx="10" ry="8" transform="rotate(-15 11 9)" fill="#fbbf24" stroke="#7c2d12" stroke-width="2.5"/>
+                <rect x="-3" y="-14" width="6" height="30" rx="3" fill="#1e293b"/>
+                <path d="M-2,-14 Q-8,-23 -12,-21 M2,-14 Q8,-23 12,-21" fill="none" stroke="#1e293b" stroke-width="2" stroke-linecap="round"/>
+            </g>
+        `;
+    }
+
+    function svgMango(x, y, scale = 1) {
+        return `
+            <g transform="translate(${x}, ${y}) scale(${scale})">
+                <ellipse cx="0" cy="25" rx="20" ry="6" fill="rgba(0,0,0,0.18)"/>
+                <path d="M0,-22 C-18,-22 -28,2 -16,20 C-6,30 12,24 19,10 C26,-4 16,-22 0,-22 Z"
+                      fill="#eab308" stroke="#854d0e" stroke-width="3"/>
+                <path d="M0,-22 Q3,-30 8,-33" fill="none" stroke="#78350f" stroke-width="3.5" stroke-linecap="round"/>
+            </g>
+        `;
+    }
+
+    function svgOrange(x, y, scale = 1) {
+        return `
+            <g transform="translate(${x}, ${y}) scale(${scale})">
+                <circle cx="0" cy="2" r="21" fill="#fb923c" stroke="#9a3412" stroke-width="3"/>
+                <path d="M0,-19 Q10,-28 16,-19 Q7,-13 0,-19 Z" fill="#16a34a" stroke="#14532d" stroke-width="2"/>
+            </g>
+        `;
+    }
+
+    function svgEgg(x, y, scale = 1) {
+        return `
+            <g transform="translate(${x}, ${y}) scale(${scale})">
+                <ellipse cx="0" cy="0" rx="16" ry="22" fill="#fffbeb" stroke="#b45309" stroke-width="3"/>
+                <circle cx="-4" cy="-5" r="2.5" fill="#fde68a"/>
+                <circle cx="5" cy="4" r="3" fill="#fde68a"/>
+            </g>
+        `;
+    }
+
+    function svgLaddu(x, y, scale = 1) {
+        return `
+            <g transform="translate(${x}, ${y}) scale(${scale})">
+                <circle cx="0" cy="0" r="20" fill="#f59e0b" stroke="#92400e" stroke-width="3"/>
+                <circle cx="-6" cy="-5" r="2.5" fill="#fef08a"/>
+                <circle cx="6" cy="-3" r="2.5" fill="#fef08a"/>
+                <circle cx="0" cy="6" r="2.5" fill="#dc2626"/>
+            </g>
+        `;
+    }
+
+    function svgPencil(x, y, scale = 1) {
+        return `
+            <g transform="translate(${x}, ${y}) scale(${scale})">
+                <rect x="-7" y="-20" width="14" height="34" rx="2" fill="#facc15" stroke="#854d0e" stroke-width="2.5"/>
+                <polygon points="-7,-20 7,-20 0,-32" fill="#fed7aa" stroke="#854d0e" stroke-width="2.5" stroke-linejoin="round"/>
+                <polygon points="-3,-27 3,-27 0,-32" fill="#1e293b"/>
+                <rect x="-7" y="14" width="14" height="7" rx="2" fill="#f472b6" stroke="#831843" stroke-width="2"/>
+            </g>
+        `;
+    }
+
+    // =========================================================================
+    // 3. QUESTION POOLS & APP CONTROLLER
+    // =========================================================================
+    const QUESTION_POOLS = {
+        counting: [
+            {
+                variantId: 'cnt_apples_6',
+                skillKey: 'counting',
+                badge: 'सीप १ • गन्ती गर्ने (१ देखि १० सम्म)',
+                question: 'बगैँचामा रहेका राता स्याउहरू एक-एक गरी छोएर गन्नुहोस् र सही अङ्क छान्नुहोस्।',
+                type: 'counting',
+                targetCount: 6,
+                choices: [4, 6, 8, 9],
+                positions: [
+                    { x: 170, y: 120 }, { x: 330, y: 95 }, { x: 510, y: 115 },
+                    { x: 700, y: 100 }, { x: 250, y: 235 }, { x: 600, y: 235 }
+                ],
+                drawBackground: () => `
+                    <rect width="900" height="220" fill="#bae6fd"/>
+                    <circle cx="820" cy="52" r="32" fill="#fde047" stroke="#f59e0b" stroke-width="3"/>
+                    <rect y="220" width="900" height="120" fill="#86efac"/>
+                    <line x1="0" y1="220" x2="900" y2="220" stroke="#16a34a" stroke-width="4"/>
+                `,
+                drawItem: (x, y) => svgApple(x, y, 1.35)
+            },
+            {
+                variantId: 'cnt_fish_9',
+                skillKey: 'counting',
+                badge: 'सीप १ • गन्ती गर्ने (१ देखि १० सम्म)',
+                question: 'पोखरीमा पौडिरहेका माछाहरू एक-एक गरी छोएर गन्नुहोस् र सही अङ्क छान्नुहोस्।',
+                type: 'counting',
+                targetCount: 9,
+                choices: [7, 8, 9, 10],
+                positions: [
+                    { x: 145, y: 95 }, { x: 310, y: 85 }, { x: 485, y: 95 }, { x: 665, y: 85 }, { x: 800, y: 135 },
+                    { x: 195, y: 225 }, { x: 380, y: 215 }, { x: 565, y: 230 }, { x: 740, y: 245 }
+                ],
+                drawBackground: () => `
+                    <rect width="900" height="340" fill="#e0f2fe"/>
+                    <ellipse cx="450" cy="175" rx="420" ry="145" fill="#7dd3fc" stroke="#0284c7" stroke-width="6"/>
+                `,
+                drawItem: (x, y) => svgFish(x, y, 1.32)
+            }
+        ],
+        comparing: [
+            {
+                variantId: 'cmp_mangoes_more',
+                skillKey: 'comparing',
+                badge: 'सीप २ • तुलना गर्ने (धेरै र थोरै)',
+                question: 'कुन टोकरीमा धेरै आँप छन्? धेरै आँप भएको टोकरीमा क्लिक गर्नुहोस्।',
+                type: 'comparing',
+                correctSide: 'right',
+                renderCompareScene() {
+                    const leftCoords = [{ x: 185, y: 170 }, { x: 255, y: 170 }, { x: 185, y: 230 }, { x: 255, y: 230 }];
+                    const rightCoords = [
+                        { x: 590, y: 150 }, { x: 660, y: 150 }, { x: 730, y: 150 },
+                        { x: 590, y: 210 }, { x: 660, y: 210 }, { x: 730, y: 210 }, { x: 660, y: 262 }
+                    ];
+                    return buildCompareSvg('#fefce8', '#ffffff', '#f59e0b', '#fef08a', '#ca8a04', '#713f12', 'टोकरी (क)', 'टोकरी (ख)', leftCoords, rightCoords, svgMango);
+                }
+            }
+        ],
+        reading: [
+            {
+                variantId: 'read_asc_1_10',
+                skillKey: 'reading',
+                badge: 'सीप ३ • पढ्ने (शिक्षक मूल्याङ्कन)',
+                question: 'तल दिइएका देवनागरी अङ्कहरू क्रमशः १ देखि १० सम्म ठूलो स्वरले पढेर शिक्षकलाई सुनाऊ।',
+                type: 'reading',
+                numbers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                instruction: 'तल दिइएका देवनागरी अङ्कहरू क्रमशः (<strong>१ देखि १० सम्म</strong>) स्पष्ट उच्चारणका साथ ठूलो स्वरले पढेर शिक्षकलाई सुनाऊ।'
+            }
+        ],
+        writing: [
+            {
+                variantId: 'write_seq_1_10',
+                skillKey: 'writing',
+                badge: 'सीप ४ • लेख्ने (शिक्षक मूल्याङ्कन)',
+                question: 'आफ्नो कापीमा वा तलको पाटीमा देवनागरी अङ्क १ देखि १० सम्म सफा अक्षरमा लेखेर शिक्षकलाई देखाऊ।',
+                type: 'writing',
+                displayTokens: ['१', '२', '३', '४', '५', '६', '७', '८', '९', '१०'],
+                instruction: 'आफ्नो कापीमा वा तलको डिजिटल पाटीमा देवनागरी अङ्क <strong>१ देखि १० सम्म</strong> सफा अक्षरमा लेखेर शिक्षकलाई देखाऊ।'
+            }
+        ]
+    };
+
+    function buildCompareSvg(bgFill, boxFill, boxStroke, pillFill, pillStroke, textFill, leftTitle, rightTitle, leftCoords, rightCoords, drawFn) {
+        return `
+        <svg viewBox="0 0 900 340" preserveAspectRatio="xMidYMid slice">
+            <rect width="900" height="340" fill="${bgFill}"/>
+            <line x1="450" y1="25" x2="450" y2="315" stroke="#cbd5e1" stroke-width="4" stroke-dasharray="12 10"/>
+
+            <g class="compare-group" data-side="left" tabindex="0" role="button" aria-label="${leftTitle}">
+                <rect x="75" y="32" width="290" height="276" rx="24" fill="${boxFill}" stroke="${boxStroke}" stroke-width="5"/>
+                <rect x="115" y="18" width="210" height="36" rx="18" fill="${pillFill}" stroke="${pillStroke}" stroke-width="3"/>
+                <text x="220" y="42" text-anchor="middle" font-size="20" font-weight="800" fill="${textFill}">${leftTitle}</text>
+                ${leftCoords.map(p => drawFn(p.x, p.y, 1.08)).join('')}
+            </g>
+
+            <g class="compare-group" data-side="right" tabindex="0" role="button" aria-label="${rightTitle}">
+                <rect x="515" y="32" width="290" height="276" rx="24" fill="${boxFill}" stroke="${boxStroke}" stroke-width="5"/>
+                <rect x="555" y="18" width="210" height="36" rx="18" fill="${pillFill}" stroke="${pillStroke}" stroke-width="3"/>
+                <text x="660" y="42" text-anchor="middle" font-size="20" font-weight="800" fill="${textFill}">${rightTitle}</text>
+                ${rightCoords.map(p => drawFn(p.x, p.y, 1.08)).join('')}
+            </g>
+        </svg>`;
+    }
+
+    const usedVariantTracker = {
+        counting: new Set(),
+        comparing: new Set(),
+        reading: new Set(),
+        writing: new Set()
+    };
+
+    let sessionPlayCount = 0;
+
+    function pickFreshVariants(poolKey, countNeeded) {
+        const pool = QUESTION_POOLS[poolKey];
+        const usedSet = usedVariantTracker[poolKey];
+        let available = pool.filter(item => !usedSet.has(item.variantId));
+        if (available.length < countNeeded) {
+            usedSet.clear();
+            available = [...pool];
+        }
+        for (let i = available.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [available[i], available[j]] = [available[j], available[i]];
+        }
+        const chosen = available.slice(0, countNeeded);
+        chosen.forEach(item => usedSet.add(item.variantId));
+        return chosen;
+    }
+
+    let ACTIVE_STEPS = [];
+
+    function buildFreshSessionSteps() {
+        sessionPlayCount += 1;
+        const cntPicked = pickFreshVariants('counting', 1);
+        const cmpPicked = pickFreshVariants('comparing', 1);
+        const readPicked = pickFreshVariants('reading', 1);
+        const writePicked = pickFreshVariants('writing', 1);
+
+        ACTIVE_STEPS = [...cntPicked, ...cmpPicked, ...readPicked, ...writePicked];
+    }
+
+    const gameState = {
+        currentIdx: 0,
+        countingProgress: 0,
+        countingRoundsPassed: 0,
+        comparingRoundsPassed: 0,
+        skills: {
+            counting: { label: '१. गन्ती गर्ने (१ देखि १० सम्म)', passed: false, remark: '' },
+            comparing: { label: '२. तुलना गर्ने (धेरै र थोरै)', passed: false, remark: '' },
+            reading: { label: '३. पढ्ने (देवनागरी अङ्क)', passed: false, evaluated: false, remark: '' },
+            writing: { label: '४. लेख्ने (देवनागरी अङ्क)', passed: false, evaluated: false, remark: '' }
+        }
+    };
+
+    const ui = {
+        sessionSetHud: document.getElementById('sessionSetHud'),
+        stepHud: document.getElementById('stepHud'),
+        skillCountHud: document.getElementById('skillCountHud'),
+        autoReadToggle: document.getElementById('autoReadToggle'),
+        conceptBadge: document.getElementById('conceptBadge'),
+        questionHeading: document.getElementById('questionHeading'),
+        readQuestionBtn: document.getElementById('readQuestionBtn'),
+        stageContainer: document.getElementById('stageContainer'),
+        statusBanner: document.getElementById('statusBanner'),
+        nextBtn: document.getElementById('nextBtn'),
+        startModal: document.getElementById('startModal'),
+        reportModal: document.getElementById('reportModal'),
+        startBtn: document.getElementById('startBtn'),
+        restartBtn: document.getElementById('restartBtn'),
+        finalPointBadge: document.getElementById('finalPointBadge'),
+        skillSummaryBody: document.getElementById('skillSummaryBody'),
+        rubricTableBody: document.getElementById('rubricTableBody')
+    };
+
+    function countPassedSkills() {
+        return Object.values(gameState.skills).filter(s => s.passed).length;
+    }
+
+    function computeRubricPoints() {
+        const n = countPassedSkills();
+        if (n >= 4) return 4;
+        if (n === 3) return 3;
+        if (n === 2) return 2;
+        return 1;
+    }
+
+    function updateSkillsStepper() {
+        const activeSkill = ACTIVE_STEPS[gameState.currentIdx]?.skillKey;
+        ['counting', 'comparing', 'reading', 'writing'].forEach(k => {
+            const tab = document.getElementById(`tab-${k}`);
+            const badge = document.getElementById(`status-${k}`);
+            tab.classList.remove('active', 'passed', 'needs-help');
+            if (k === activeSkill) tab.classList.add('active');
+            if (gameState.skills[k].passed) {
+                tab.classList.add('passed');
+                badge.textContent = '✅';
+            } else if ((k === 'reading' || k === 'writing') && gameState.skills[k].evaluated && !gameState.skills[k].passed) {
+                tab.classList.add('needs-help');
+                badge.textContent = '⚠️';
+            } else {
+                badge.textContent = '⏳';
+            }
+        });
+        ui.skillCountHud.textContent = toNepaliNum(countPassedSkills());
+    }
+
+    function launchConfetti() {
+        const colors = ['#ef4444', '#f59e0b', '#22c55e', '#3b82f6', '#8b5cf6', '#ec4899'];
+        for (let i = 0; i < 28; i++) {
+            const c = document.createElement('div');
+            c.className = 'confetti';
+            c.style.left = (Math.random() * 94) + '%';
+            c.style.top = '0px';
+            c.style.backgroundColor = colors[i % colors.length];
+            c.style.animationDelay = (Math.random() * 0.25) + 's';
+            ui.stageContainer.appendChild(c);
+            setTimeout(() => c.remove(), 1900);
+        }
+    }
+
+    function renderKaraokeQuestion(text) {
+        ui.questionHeading.innerHTML = text.split(' ').map(w => `<span class="q-word">${w}</span>`).join(' ');
+    }
+
+    function renderStep(index, shouldSpeak = true) {
+        const step = ACTIVE_STEPS[index];
+        gameState.countingProgress = 0;
+        reader.stopSpeaking();
+
+        ui.sessionSetHud.textContent = `प्रश्न सेट #${toNepaliNum(sessionPlayCount)}`;
+        ui.stepHud.textContent = `चरण ${toNepaliNum(index + 1)} / ${toNepaliNum(ACTIVE_STEPS.length)}`;
+        ui.conceptBadge.textContent = step.badge;
+        renderKaraokeQuestion(step.question);
+        updateSkillsStepper();
+
+        ui.nextBtn.disabled = true;
+        ui.nextBtn.innerHTML = (index === ACTIVE_STEPS.length - 1) ? 'मूल्याङ्कन नतिजा हेर्नुहोस् 🏆' : 'अर्को चरण ➡️';
+
+        if (step.type === 'counting') renderCountingStep(step);
+        else if (step.type === 'comparing') renderComparingStep(step);
+        else if (step.type === 'reading') renderReadingStep(step);
+        else if (step.type === 'writing') renderWritingStep(step);
+
+        if (shouldSpeak && reader.autoRead && ui.startModal.classList.contains('hidden')) {
+            setTimeout(() => reader.speakNepali(step.question, true), 260);
+        }
+    }
+
+    function renderCountingStep(step) {
+        ui.statusBanner.className = 'feedback-box';
+        ui.statusBanner.textContent = 'पहिले चित्रका वस्तुहरू एक-एक गरी छोएर गन्नुहोस्, अनि तलको अङ्क छान्नुहोस्! 👆';
+
+        const itemsSvg = step.positions.map((pos, idx) => `
+            <g class="count-item" data-idx="${idx}" data-counted="false" tabindex="0" role="button">
+                ${step.drawItem(pos.x, pos.y)}
+                <g class="num-tag" opacity="0" pointer-events="none">
+                    <circle cx="${pos.x + 24}" cy="${pos.y - 24}" r="18" fill="#16a34a" stroke="#ffffff" stroke-width="3"/>
+                    <text x="${pos.x + 24}" y="${pos.y - 17}" text-anchor="middle" font-size="20" font-weight="800" fill="#ffffff" class="tag-text"></text>
+                </g>
+            </g>
+        `).join('');
+
+        const choicesHtml = step.choices.map(num => `
+            <button type="button" class="num-card-btn" data-val="${num}">${NEPALI_DIGITS[num]}</button>
+        `).join('');
+
+        ui.stageContainer.innerHTML = `
+            <div class="visual-board">
+                <div class="svg-box">
+                    <svg viewBox="0 0 900 340" preserveAspectRatio="xMidYMid slice">
+                        ${step.drawBackground()}
+                        ${itemsSvg}
+                    </svg>
+                </div>
+                <div class="counting-toolbar">
+                    <div class="live-count-pill">
+                        <span>गनेको सङ्ख्या:</span>
+                        <span class="live-count-num" id="liveCountNum">०</span>
+                    </div>
+                    <div class="num-choices">
+                        <span style="font-weight: 800; color: #334155;">जम्मा कति ओटा छन्?</span>
+                        ${choicesHtml}
+                    </div>
+                </div>
+            </div>
+        `;
+
+        ui.stageContainer.querySelectorAll('.count-item').forEach(item => {
+            item.addEventListener('click', () => {
+                if (item.dataset.counted === 'true') return;
+                item.dataset.counted = 'true';
+                item.classList.add('counted');
+                gameState.countingProgress += 1;
+                const currentNum = gameState.countingProgress;
+                item.querySelector('.tag-text').textContent = NEPALI_DIGITS[currentNum];
+                item.querySelector('.num-tag').setAttribute('opacity', '1');
+                document.getElementById('liveCountNum').textContent = NEPALI_DIGITS[currentNum];
+                reader.playPop(currentNum);
+                if (reader.autoRead) reader.speakNepali(NEPALI_WORDS[currentNum], false);
+            });
+        });
+
+        let solved = false;
+        ui.stageContainer.querySelectorAll('.num-card-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (solved) return;
+                const chosen = Number(btn.dataset.val);
+                if (chosen === step.targetCount) {
+                    solved = true;
+                    btn.classList.add('correct');
+                    reader.playSuccess();
+                    launchConfetti();
+                    gameState.skills.counting.passed = true;
+                    updateSkillsStepper();
+                    const msg = `स्याबास! जम्मा ${NEPALI_DIGITS[step.targetCount]} ओटा छन्!`;
+                    ui.statusBanner.className = 'feedback-box success';
+                    ui.statusBanner.textContent = msg + ' 🌟';
+                    ui.nextBtn.disabled = false;
+                } else {
+                    btn.classList.add('wrong');
+                    reader.playError();
+                    ui.statusBanner.className = 'feedback-box error';
+                    ui.statusBanner.textContent = 'मिलेन! फेरि प्रयास गर्नुहोस्। 🤔';
+                }
+            });
+        });
+    }
+
+    function renderComparingStep(step) {
+        ui.statusBanner.className = 'feedback-box';
+        ui.statusBanner.textContent = 'दुवै चित्र राम्ररी गन्नुहोस् र सही समूहमा क्लिक गर्नुहोस्! 👆';
+        ui.stageContainer.innerHTML = `<div class="visual-board"><div class="svg-box">${step.renderCompareScene()}</div></div>`;
+
+        let solved = false;
+        ui.stageContainer.querySelectorAll('.compare-group').forEach(group => {
+            group.addEventListener('click', () => {
+                if (solved) return;
+                if (group.dataset.side === step.correctSide) {
+                    solved = true;
+                    reader.playSuccess();
+                    launchConfetti();
+                    gameState.skills.comparing.passed = true;
+                    updateSkillsStepper();
+                    ui.statusBanner.className = 'feedback-box success';
+                    ui.statusBanner.textContent = 'बिल्कुल सही! 🌟';
+                    ui.nextBtn.disabled = false;
+                } else {
+                    reader.playError();
+                    ui.statusBanner.className = 'feedback-box error';
+                    ui.statusBanner.textContent = 'मिलेन! फेरि प्रयास गर्नुहोस्। 🤔';
+                }
+            });
+        });
+    }
+
+    function renderReadingStep(step) {
+        ui.statusBanner.className = 'feedback-box';
+        ui.statusBanner.textContent = 'विद्यार्थीले अङ्क पढेपछि शिक्षकले दायाँपट्टिको बाकसमा मूल्याङ्कन गर्नुहोस्। 👩‍🏫';
+
+        const cardsHtml = step.numbers.map(n => `
+            <div class="flash-num-card">
+                <span class="flash-digit">${NEPALI_DIGITS[n]}</span>
+                <span class="flash-word">${NEPALI_WORDS[n]}</span>
+            </div>
+        `).join('');
+
+        ui.stageContainer.innerHTML = `
+            <div class="rw-workspace">
+                <div class="student-task-panel">
+                    <div class="task-instruction-box">📢 <strong>विद्यार्थीका लागि निर्देशन:</strong> ${step.instruction}</div>
+                    <div class="reading-cards-grid">${cardsHtml}</div>
+                </div>
+                <aside class="teacher-box">
+                    <div>
+                        <div class="teacher-box-header"><span style="font-size: 1.5rem;">👩‍🏫</span><h3>शिक्षक मूल्याङ्कन बाकस</h3></div>
+                        <p class="teacher-desc" style="margin-top: 8px;">विद्यार्थीले अङ्कहरू सही उच्चारणका साथ पढ्न सक्यो?</p>
+                    </div>
+                    <div class="teacher-mark-buttons">
+                        <button type="button" class="mark-option-btn" id="readPassBtn"><span>✅ विद्यार्थीले सही पढ्यो (सफल)</span></button>
+                        <button type="button" class="mark-option-btn" id="readFailBtn"><span>❌ थप अभ्यास आवश्यक (असफल)</span></button>
+                    </div>
+                    <div>
+                        <input type="text" id="readRemarkInput" class="teacher-note-input" placeholder="शिक्षकको कैफियत (ऐच्छिक)...">
+                    </div>
+                </aside>
+            </div>
+        `;
+
+        const passBtn = document.getElementById('readPassBtn');
+        const failBtn = document.getElementById('readFailBtn');
+
+        document.getElementById('readRemarkInput').addEventListener('input', e => {
+            gameState.skills.reading.remark = e.target.value.trim();
+        });
+
+        passBtn.addEventListener('click', () => {
+            gameState.skills.reading.evaluated = true;
+            gameState.skills.reading.passed = true;
+            passBtn.classList.add('selected-pass');
+            failBtn.classList.remove('selected-fail');
+            updateSkillsStepper();
+            reader.playSuccess();
+            launchConfetti();
+            ui.statusBanner.className = 'feedback-box success';
+            ui.statusBanner.textContent = 'पढाइ सीप सफल! ✅';
+            ui.nextBtn.disabled = false;
+        });
+
+        failBtn.addEventListener('click', () => {
+            gameState.skills.reading.evaluated = true;
+            gameState.skills.reading.passed = false;
+            failBtn.classList.add('selected-fail');
+            passBtn.classList.remove('selected-pass');
+            updateSkillsStepper();
+            ui.statusBanner.className = 'feedback-box error';
+            ui.statusBanner.textContent = 'थप अभ्यास आवश्यक। 📝';
+            ui.nextBtn.disabled = false;
+        });
+    }
+
+    function renderWritingStep(step) {
+        ui.statusBanner.className = 'feedback-box';
+        ui.statusBanner.textContent = 'विद्यार्थीले अङ्क लेखेपछि शिक्षकले दायाँपट्टिको बाकसमा मूल्याङ्कन गर्नुहोस्। 👩‍🏫';
+
+        ui.stageContainer.innerHTML = `
+            <div class="rw-workspace">
+                <div class="student-task-panel">
+                    <div class="task-instruction-box">✍️ <strong>विद्यार्थीका लागि निर्देशन:</strong> ${step.instruction}</div>
+                    <div class="writing-targets-row">
+                        <span style="font-weight: 800; color: #78350f;">नमुना अङ्कहरू:</span>
+                        ${step.displayTokens.map(tok => `<span class="target-badge">${tok}</span>`).join('')}
+                    </div>
+                    <div class="slate-wrapper">
+                        <div class="slate-header">
+                            <span>🖍️ अभ्यास पाटी</span>
+                            <div class="slate-tools">
+                                <button type="button" class="slate-tool-btn" id="chalkWhiteBtn">सेतो चक</button>
+                                <button type="button" class="slate-tool-btn" id="clearSlateBtn" style="background: #dc2626;">मेट्नुहोस्</button>
+                            </div>
+                        </div>
+                        <canvas id="writingCanvas"></canvas>
+                    </div>
+                </div>
+                <aside class="teacher-box">
+                    <div>
+                        <div class="teacher-box-header"><span style="font-size: 1.5rem;">👩‍🏫</span><h3>शिक्षक मूल्याङ्कन बाकस</h3></div>
+                        <p class="teacher-desc" style="margin-top: 8px;">विद्यार्थीले अङ्कहरू सफासँग लेख्न सक्यो?</p>
+                    </div>
+                    <div class="teacher-mark-buttons">
+                        <button type="button" class="mark-option-btn" id="writePassBtn"><span>✅ विद्यार्थीले सही लेख्यो (सफल)</span></button>
+                        <button type="button" class="mark-option-btn" id="writeFailBtn"><span>❌ थप अभ्यास आवश्यक (असफल)</span></button>
+                    </div>
+                    <div>
+                        <input type="text" id="writeRemarkInput" class="teacher-note-input" placeholder="शिक्षकको कैफियत (ऐच्छिक)...">
+                    </div>
+                </aside>
+            </div>
+        `;
+
+        const canvas = document.getElementById('writingCanvas');
+        const ctx = canvas.getContext('2d');
+        let drawing = false;
+
+        function resizeCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.lineWidth = 5;
+            ctx.strokeStyle = '#ffffff';
+        }
+        resizeCanvas();
+
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return { x: clientX - rect.left, y: clientY - rect.top };
+        }
+
+        canvas.addEventListener('mousedown', e => { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); });
+        canvas.addEventListener('mousemove', e => { if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); });
+        window.addEventListener('mouseup', () => { drawing = false; });
+        canvas.addEventListener('touchstart', e => { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }, { passive: true });
+        canvas.addEventListener('touchmove', e => { if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); }, { passive: true });
+
+        document.getElementById('clearSlateBtn').addEventListener('click', () => ctx.clearRect(0, 0, canvas.width, canvas.height));
+
+        const passBtn = document.getElementById('writePassBtn');
+        const failBtn = document.getElementById('writeFailBtn');
+
+        document.getElementById('writeRemarkInput').addEventListener('input', e => {
+            gameState.skills.writing.remark = e.target.value.trim();
+        });
+
+        passBtn.addEventListener('click', () => {
+            gameState.skills.writing.evaluated = true;
+            gameState.skills.writing.passed = true;
+            passBtn.classList.add('selected-pass');
+            failBtn.classList.remove('selected-fail');
+            updateSkillsStepper();
+            reader.playSuccess();
+            launchConfetti();
+            ui.statusBanner.className = 'feedback-box success';
+            ui.statusBanner.textContent = 'लेखाइ सीप सफल! ✅';
+            ui.nextBtn.disabled = false;
+        });
+
+        failBtn.addEventListener('click', () => {
+            gameState.skills.writing.evaluated = true;
+            gameState.skills.writing.passed = false;
+            failBtn.classList.add('selected-fail');
+            passBtn.classList.remove('selected-pass');
+            updateSkillsStepper();
+            ui.statusBanner.className = 'feedback-box error';
+            ui.statusBanner.textContent = 'थप अभ्यास आवश्यक। 📝';
+            ui.nextBtn.disabled = false;
+        });
+    }
+
+    function openReportCard() {
+        reader.stopSpeaking();
+        reader.playFanfare();
+        const earnedPts = computeRubricPoints();
+        ui.finalPointBadge.textContent = `प्राप्त अङ्क: ${toNepaliNum(earnedPts)} अङ्क`;
+
+        const keys = ['counting', 'comparing', 'reading', 'writing'];
+        ui.skillSummaryBody.innerHTML = keys.map((k, idx) => {
+            const sk = gameState.skills[k];
+            const statusText = sk.passed ? '✅ सफल' : '⚠️ थप सहायता आवश्यक';
+            return `<tr><td><strong>${toNepaliNum(idx + 1)}</strong></td><td>${sk.label}</td><td><strong>${statusText}</strong></td><td>${sk.remark || 'सन्तोषजनक'}</td></tr>`;
+        }).join('');
+
+        ui.rubricTableBody.querySelectorAll('tr').forEach(row => {
+            row.classList.remove('active-row');
+            if (Number(row.dataset.pts) === earnedPts) row.classList.add('active-row');
+        });
+
+        ui.reportModal.classList.remove('hidden');
+    }
+
+    ui.startBtn.addEventListener('click', () => { reader.ensureAudioCtx(); buildFreshSessionSteps(); renderStep(0, true); ui.startModal.classList.add('hidden'); });
+    ui.restartBtn.addEventListener('click', () => { reader.ensureAudioCtx(); buildFreshSessionSteps(); renderStep(0, true); ui.reportModal.classList.add('hidden'); });
+    ui.readQuestionBtn.addEventListener('click', () => { reader.ensureAudioCtx(); reader.speakNepali(ACTIVE_STEPS[gameState.currentIdx].question, true); });
+
+    ui.autoReadToggle.addEventListener('click', () => {
+        reader.autoRead = !reader.autoRead;
+        if (reader.autoRead) {
+            ui.autoReadToggle.classList.remove('off');
+            ui.autoReadToggle.textContent = '🔊 स्वतः वाचन: चालु';
+            reader.speakNepali(ACTIVE_STEPS[gameState.currentIdx].question, true);
+        } else {
+            reader.stopSpeaking();
+            ui.autoReadToggle.classList.add('off');
+            ui.autoReadToggle.textContent = '🔇 स्वतः वाचन: बन्द';
+        }
+    });
+
+    ui.nextBtn.addEventListener('click', () => {
+        if (gameState.currentIdx < ACTIVE_STEPS.length - 1) {
+            gameState.currentIdx += 1;
+            renderStep(gameState.currentIdx, true);
+        } else {
+            openReportCard();
+        }
+    });
+</script>
+</body>
+</html>

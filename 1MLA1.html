@@ -1,0 +1,1884 @@
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>स्थानिक ज्ञान खेल - Spatial Explorer</title>
+    <!-- Clear Devanagari Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@600;700;800&family=Noto+Sans+Devanagari:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* =====================================================================
+           1. STORYBOOK DESIGN TOKENS & GLOBAL STYLES
+           ===================================================================== */
+        :root {
+            --sky-top: #bae6fd;
+            --sky-mid: #e0f2fe;
+            --sun-warm: #fef3c7;
+            --surface: #ffffff;
+            --primary: #2563eb;
+            --primary-shadow: #1e3a8a;
+            --purple: #7c3aed;
+            --purple-shadow: #4c1d95;
+            --amber: #f59e0b;
+            --amber-shadow: #b45309;
+            --success: #15803d;
+            --success-bg: #dcfce7;
+            --success-border: #22c55e;
+            --error: #b91c1c;
+            --error-bg: #fee2e2;
+            --error-border: #ef4444;
+            --text-dark: #0f172a;
+            --text-muted: #475569;
+            --radius-2xl: 28px;
+            --radius-xl: 20px;
+            --radius-lg: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Mukta', 'Noto Sans Devanagari', sans-serif;
+            background: radial-gradient(circle at 15% 15%, #fef08a 0%, transparent 28%),
+                        linear-gradient(165deg, var(--sky-top) 0%, var(--sky-mid) 50%, var(--sun-warm) 100%);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            overflow-x: hidden;
+        }
+
+        /* =====================================================================
+           2. MAIN GAME CONTAINER (TACTILE STORYBOOK CARD)
+           ===================================================================== */
+        .app-shell {
+            width: 100%;
+            max-width: 960px;
+            background: var(--surface);
+            border-radius: var(--radius-2xl);
+            border: 4px solid #ffffff;
+            box-shadow: 0 20px 45px -10px rgba(15, 23, 42, 0.22), 0 6px 0 #cbd5e1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Top Vibrant Header */
+        header {
+            background: linear-gradient(90deg, #1d4ed8 0%, #3b82f6 50%, #6366f1 100%);
+            color: #ffffff;
+            padding: 12px 20px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            border-bottom: 4px solid #1e40af;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-badge {
+            width: 48px;
+            height: 48px;
+            background: #fde047;
+            border: 3px solid #ffffff;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px 0 #ca8a04;
+        }
+
+        .brand h1 {
+            font-size: clamp(1.35rem, 3vw, 1.8rem);
+            font-weight: 800;
+            line-height: 1.1;
+            text-shadow: 0 2px 4px rgba(15, 23, 42, 0.25);
+        }
+
+        .brand p {
+            font-size: 0.92rem;
+            opacity: 0.95;
+            font-weight: 600;
+        }
+
+        .hud-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .hud-pill {
+            background: rgba(15, 23, 42, 0.24);
+            border: 2px solid rgba(255, 255, 255, 0.45);
+            padding: 5px 14px;
+            border-radius: 999px;
+            font-weight: 800;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .auto-read-btn {
+            background: #fef08a;
+            color: #713f12;
+            border: 2px solid #ffffff;
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-family: inherit;
+            font-weight: 800;
+            font-size: 0.92rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 3px 0 #ca8a04;
+            transition: transform 0.12s, background 0.2s;
+        }
+
+        .auto-read-btn.off {
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            box-shadow: none;
+        }
+
+        .auto-read-btn:active {
+            transform: translateY(2px);
+        }
+
+        /* Progress Bar Strip */
+        .progress-strip {
+            background: #f1f5f9;
+            padding: 8px 20px;
+            border-bottom: 2px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            font-weight: 800;
+            font-size: 0.98rem;
+            color: #334155;
+        }
+
+        .progress-track {
+            flex: 1;
+            height: 14px;
+            background: #cbd5e1;
+            border-radius: 999px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.12);
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 10%;
+            background: linear-gradient(90deg, #16a34a, #4ade80);
+            border-radius: 999px;
+            transition: width 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* =====================================================================
+           3. QUESTION BANNER + NEPALI AUDIO READER BAR
+           ===================================================================== */
+        .question-card {
+            margin: 12px 18px 6px;
+            background: linear-gradient(180deg, #eff6ff 0%, #dbeafe 100%);
+            border: 3px solid #93c5fd;
+            border-radius: var(--radius-xl);
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .question-text-area {
+            flex: 1;
+            min-width: 240px;
+        }
+
+        .concept-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #1d4ed8;
+            color: #ffffff;
+            font-size: 0.9rem;
+            font-weight: 800;
+            padding: 3px 13px;
+            border-radius: 999px;
+            margin-bottom: 5px;
+        }
+
+        .question-heading {
+            font-size: clamp(1.3rem, 3vw, 1.78rem);
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1.35;
+        }
+
+        /* Karaoke Word Highlighting while Nepali Reader speaks */
+        .q-word {
+            display: inline-block;
+            padding: 0 3px;
+            border-radius: 6px;
+            transition: background-color 0.15s, color 0.15s, transform 0.15s;
+        }
+
+        .q-word.speaking {
+            background-color: #fde047;
+            color: #713f12;
+            transform: scale(1.06);
+        }
+
+        /* Prominent "Listen to Question" Speaker Button */
+        .read-btn {
+            font-family: inherit;
+            background: linear-gradient(180deg, #8b5cf6 0%, #7c3aed 100%);
+            color: #ffffff;
+            border: 3px solid #ffffff;
+            border-radius: 18px;
+            padding: 10px 18px;
+            font-size: 1.05rem;
+            font-weight: 800;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 0 var(--purple-shadow);
+            transition: transform 0.12s, box-shadow 0.12s;
+            white-space: nowrap;
+        }
+
+        .read-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 var(--purple-shadow);
+        }
+
+        .read-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 var(--purple-shadow);
+        }
+
+        .read-btn.is-speaking {
+            background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%);
+            box-shadow: 0 4px 0 #92400e;
+        }
+
+        /* Animated Sound Wave Bars inside Speaker Button */
+        .sound-bars {
+            display: inline-flex;
+            align-items: flex-end;
+            gap: 2px;
+            height: 16px;
+        }
+
+        .sound-bars span {
+            width: 3px;
+            height: 6px;
+            background: #ffffff;
+            border-radius: 2px;
+        }
+
+        .read-btn.is-speaking .sound-bars span:nth-child(1) {
+            animation: soundWave 0.45s infinite alternate;
+        }
+        .read-btn.is-speaking .sound-bars span:nth-child(2) {
+            animation: soundWave 0.45s 0.15s infinite alternate;
+        }
+        .read-btn.is-speaking .sound-bars span:nth-child(3) {
+            animation: soundWave 0.45s 0.3s infinite alternate;
+        }
+
+        @keyframes soundWave {
+            0% { height: 5px; }
+            100% { height: 16px; }
+        }
+
+        /* =====================================================================
+           4. LARGE, CRYSTAL-CLEAR SVG PICTURE STAGE
+           ===================================================================== */
+        .stage-container {
+            padding: 6px 18px;
+        }
+
+        .svg-frame {
+            width: 100%;
+            aspect-ratio: 900 / 440;
+            max-height: 440px;
+            min-height: 290px;
+            border-radius: var(--radius-xl);
+            border: 4px solid #64748b;
+            overflow: hidden;
+            position: relative;
+            background: #e0f2fe;
+            box-shadow: inset 0 3px 14px rgba(15, 23, 42, 0.1);
+        }
+
+        .svg-frame svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* Interactive Picture Objects */
+        .clickable-obj {
+            cursor: pointer;
+            transition: filter 0.2s ease, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform-box: fill-box;
+            transform-origin: center;
+        }
+
+        .clickable-obj:hover {
+            filter: drop-shadow(0 0 14px rgba(37, 99, 235, 0.85));
+            transform: scale(1.06);
+        }
+
+        .clickable-obj:focus {
+            outline: none;
+            filter: drop-shadow(0 0 14px rgba(245, 158, 11, 0.95));
+        }
+
+        @keyframes landmarkGlow {
+            0%, 100% { filter: drop-shadow(0 0 0px rgba(245, 158, 11, 0)); }
+            50% { filter: drop-shadow(0 0 22px rgba(245, 158, 11, 1)) drop-shadow(0 0 10px rgba(250, 204, 21, 1)); }
+        }
+
+        .landmark-hint-active {
+            animation: landmarkGlow 0.9s ease-in-out 3;
+        }
+
+        @keyframes bounceWin {
+            0%, 100% { transform: scale(1); }
+            35% { transform: scale(1.18) translateY(-12px); }
+            70% { transform: scale(0.95); }
+        }
+
+        @keyframes shakeTryAgain {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-12px); }
+            40% { transform: translateX(12px); }
+            60% { transform: translateX(-8px); }
+            80% { transform: translateX(8px); }
+        }
+
+        .obj-correct {
+            animation: bounceWin 0.7s ease;
+            filter: drop-shadow(0 0 16px rgba(22, 163, 74, 0.95));
+        }
+
+        .obj-wrong {
+            animation: shakeTryAgain 0.45s ease;
+            filter: drop-shadow(0 0 14px rgba(220, 38, 38, 0.95));
+        }
+
+        /* =====================================================================
+           5. BOTTOM FEEDBACK BANNER & TACTILE BUTTONS
+           ===================================================================== */
+        .bottom-bar {
+            padding: 10px 18px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .feedback-box {
+            flex: 1;
+            min-width: 240px;
+            padding: 11px 16px;
+            border-radius: var(--radius-lg);
+            background: #f8fafc;
+            border: 3px solid #cbd5e1;
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.25s ease;
+        }
+
+        .feedback-box.success {
+            background: var(--success-bg);
+            border-color: var(--success-border);
+            color: var(--success);
+        }
+
+        .feedback-box.error {
+            background: var(--error-bg);
+            border-color: var(--error-border);
+            color: var(--error);
+        }
+
+        .action-buttons {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tactile-btn {
+            font-family: inherit;
+            font-size: 1.08rem;
+            font-weight: 800;
+            padding: 11px 20px;
+            border-radius: var(--radius-lg);
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            transition: transform 0.12s, box-shadow 0.12s, opacity 0.2s;
+        }
+
+        .btn-hint {
+            background: #fef08a;
+            color: #713f12;
+            border: 2px solid #eab308;
+            box-shadow: 0 4px 0 #ca8a04;
+        }
+
+        .btn-hint:hover:not(:disabled) {
+            background: #fde047;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 #ca8a04;
+        }
+
+        .btn-hint:active:not(:disabled) {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #ca8a04;
+        }
+
+        .btn-next {
+            background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
+            color: #ffffff;
+            box-shadow: 0 4px 0 var(--primary-shadow);
+        }
+
+        .btn-next:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 var(--primary-shadow);
+        }
+
+        .btn-next:active:not(:disabled) {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 var(--primary-shadow);
+        }
+
+        .tactile-btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        /* =====================================================================
+           6. START & EVALUATION REPORT OVERLAYS
+           ===================================================================== */
+        .overlay-screen {
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.98);
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            text-align: center;
+            overflow-y: auto;
+        }
+
+        .overlay-screen.hidden {
+            display: none;
+        }
+
+        .hero-title {
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            font-weight: 800;
+            color: #1e3a8a;
+            margin-bottom: 8px;
+        }
+
+        .hero-desc {
+            font-size: 1.12rem;
+            color: #334155;
+            max-width: 640px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+            font-weight: 600;
+        }
+
+        .levels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 12px;
+            width: 100%;
+            max-width: 740px;
+            margin-bottom: 24px;
+        }
+
+        .level-card {
+            background: #f8fafc;
+            border: 3px solid #cbd5e1;
+            border-radius: 18px;
+            padding: 12px 14px;
+            text-align: left;
+            box-shadow: 0 4px 0 #e2e8f0;
+        }
+
+        .level-card strong {
+            display: block;
+            color: #1d4ed8;
+            font-size: 1.05rem;
+            margin-bottom: 2px;
+        }
+
+        .level-card span {
+            font-size: 0.95rem;
+            color: #334155;
+            font-weight: 700;
+        }
+
+        /* Curriculum Report Card */
+        .report-box {
+            width: 100%;
+            max-width: 720px;
+            background: #f8fafc;
+            border: 3px solid #94a3b8;
+            border-radius: 20px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            border-bottom: 2px solid #cbd5e1;
+            padding-bottom: 10px;
+            margin-bottom: 12px;
+        }
+
+        .score-badge {
+            background: #fde047;
+            color: #713f12;
+            border: 2.5px solid #ca8a04;
+            font-weight: 800;
+            font-size: 1.2rem;
+            padding: 5px 18px;
+            border-radius: 999px;
+        }
+
+        .concept-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .c-pill {
+            font-size: 0.94rem;
+            font-weight: 800;
+            padding: 5px 12px;
+            border-radius: 999px;
+            border: 2px solid #cbd5e1;
+            background: #ffffff;
+            color: #64748b;
+        }
+
+        .c-pill.done {
+            background: #dcfce7;
+            border-color: #22c55e;
+            color: #14532d;
+        }
+
+        .rubric-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+            background: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .rubric-table th, .rubric-table td {
+            border: 1.5px solid #cbd5e1;
+            padding: 8px 12px;
+        }
+
+        .rubric-table th {
+            background: #e2e8f0;
+            font-weight: 800;
+        }
+
+        .rubric-table tr.active-row {
+            background: #dcfce7;
+            color: #14532d;
+            font-weight: 800;
+        }
+
+        /* Confetti Celebration */
+        .confetti {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            pointer-events: none;
+            z-index: 40;
+            animation: confettiFall 1.7s ease-out forwards;
+        }
+
+        @keyframes confettiFall {
+            0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(420px) rotate(720deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-shell">
+    <!-- Header -->
+    <header>
+        <div class="brand">
+            <div class="brand-badge" aria-hidden="true">
+                <svg width="30" height="30" viewBox="0 0 32 32" fill="none">
+                    <circle cx="16" cy="16" r="13" stroke="#1e3a8a" stroke-width="3"/>
+                    <polygon points="16,5 21,16 16,27 11,16" fill="#dc2626"/>
+                    <circle cx="16" cy="16" r="3" fill="#ffffff"/>
+                </svg>
+            </div>
+            <div>
+                <h1>स्थानिक ज्ञान खेल</h1>
+                <p>ठूला चित्र हेरौँ, नेपालीमा सुनौँ र सही स्थान चिनौँ</p>
+            </div>
+        </div>
+        <div class="hud-controls">
+            <div class="hud-pill" id="stageHud">चरण १ (१ अङ्क)</div>
+            <div class="hud-pill">⭐ <span id="starHud">०</span> / १०</div>
+            <button class="auto-read-btn" id="autoReadToggle" type="button" title="प्रश्न स्वतः पढ्ने सुविधा">
+                🔊 स्वतः वाचन: चालु
+            </button>
+        </div>
+    </header>
+
+    <!-- Progress Strip -->
+    <div class="progress-strip">
+        <span id="questionCounter">प्रश्न १ / १०</span>
+        <div class="progress-track">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <span id="conceptCounter">अवधारणा: ० / ५</span>
+    </div>
+
+    <!-- Question Banner + Nepali Audio Reader -->
+    <section class="question-card" aria-label="प्रश्न र वाचक">
+        <div class="question-text-area">
+            <div class="concept-chip" id="conceptBadge">चरण १ • भित्र र बाहिर</div>
+            <h2 class="question-heading" id="questionHeading">टोकरीको भित्र रहेको स्याउमा क्लिक गर्नुहोस्।</h2>
+        </div>
+        <button class="read-btn" id="readQuestionBtn" type="button" aria-label="नेपालीमा प्रश्न सुन्नुहोस्">
+            <span>🔊 प्रश्न सुन्नुहोस्</span>
+            <span class="sound-bars" aria-hidden="true">
+                <span></span><span></span><span></span>
+            </span>
+        </button>
+    </section>
+
+    <!-- Large, Crystal-Clear SVG Canvas Stage -->
+    <main class="stage-container">
+        <div class="svg-frame" id="svgStageFrame" role="region" aria-label="चित्र दृश्य">
+            <!-- High-definition inline SVG scene rendered dynamically -->
+        </div>
+    </main>
+
+    <!-- Bottom Feedback & Tactile Controls -->
+    <footer class="bottom-bar">
+        <div class="feedback-box" id="statusBanner" role="status" aria-live="polite">
+            चित्रमा सही वस्तु छान्नुहोस्! 👆
+        </div>
+        <div class="action-buttons">
+            <button class="tactile-btn btn-hint" id="hintBtn" type="button">
+                💡 संकेत
+            </button>
+            <button class="tactile-btn btn-next" id="nextBtn" type="button" disabled>
+                अर्को प्रश्न ➡️
+            </button>
+        </div>
+    </footer>
+
+    <!-- Start Screen Overlay -->
+    <div class="overlay-screen" id="startModal">
+        <svg width="96" height="96" viewBox="0 0 100 100" style="margin-bottom: 10px;">
+            <circle cx="50" cy="50" r="46" fill="#dbeafe" stroke="#2563eb" stroke-width="4"/>
+            <path d="M22 56 L78 56 L71 82 Q50 88 29 82 Z" fill="#d97706" stroke="#78350f" stroke-width="3.5"/>
+            <circle cx="50" cy="44" r="16" fill="#ef4444" stroke="#7f1d1d" stroke-width="3"/>
+            <path d="M50 28 Q56 18 65 23 Q57 30 50 28 Z" fill="#16a34a"/>
+        </svg>
+        <h2 class="hero-title">स्थानिक ज्ञान खेलमा स्वागत छ!</h2>
+        <p class="hero-desc">
+            प्रत्येक चित्र ठूलो र स्पष्ट बनाइएको छ। <strong>"🔊 प्रश्न सुन्नुहोस्"</strong> बटन थिचेर नेपालीमा प्रश्न सुन्नुहोस् र सही वस्तुमा क्लिक गर्नुहोस्!
+        </p>
+
+        <div class="levels-grid">
+            <div class="level-card">
+                <strong>चरण १ (१ अङ्क)</strong>
+                <span>भित्र र बाहिर, माथि र तल</span>
+            </div>
+            <div class="level-card">
+                <strong>चरण २ (२ अङ्क)</strong>
+                <span>अगाडि र पछाडि, नजिक र टाढा</span>
+            </div>
+            <div class="level-card">
+                <strong>चरण ३ (३ अङ्क)</strong>
+                <span>बायाँ, बिच र दायाँ स्थान</span>
+            </div>
+            <div class="level-card">
+                <strong>चरण ४ (४ अङ्क)</strong>
+                <span>संयुक्त स्थान चुनौती (दुई सङ्केत)</span>
+            </div>
+        </div>
+
+        <button class="tactile-btn btn-next" id="startBtn" style="font-size: 1.25rem; padding: 14px 32px;">
+            खेल सुरु गर्नुहोस् 🎮
+        </button>
+    </div>
+
+    <!-- Final Evaluation Report Card Overlay -->
+    <div class="overlay-screen hidden" id="reportModal">
+        <h2 class="hero-title">🎉 मूल्याङ्कन नतिजा (Report Card)</h2>
+        <p class="hero-desc" id="reportSummaryLine">
+            तपाईँले १० मध्ये १० ताराहरू प्राप्त गर्नुभयो।
+        </p>
+
+        <div class="report-box">
+            <div class="report-header">
+                <h3>मुख्य सिकाइ उपलब्धि: स्थानको आधारमा वस्तु छुट्याउन</h3>
+                <span class="score-badge" id="finalPointBadge">प्राप्त अङ्क: ४ अङ्क</span>
+            </div>
+
+            <div class="concept-pills" id="masteryPills">
+                <span class="c-pill" data-concept="inside_outside">भित्र र बाहिर</span>
+                <span class="c-pill" data-concept="above_below">तल र माथि</span>
+                <span class="c-pill" data-concept="front_behind">अगाडि र पछाडि</span>
+                <span class="c-pill" data-concept="near_far">नजिक र टाढा</span>
+                <span class="c-pill" data-concept="left_middle_right">दायाँ, बायाँ र बिच</span>
+            </div>
+
+            <table class="rubric-table">
+                <thead>
+                    <tr>
+                        <th style="width: 86px;">अङ्क</th>
+                        <th>सिकाइ उपलब्धि सूचक (Evaluation Criteria)</th>
+                    </tr>
+                </thead>
+                <tbody id="rubricTableBody">
+                    <tr data-pts="4">
+                        <td><strong>४ अङ्क</strong></td>
+                        <td>भित्र र बाहिर, अगाडि र पछाडि, तल र माथि, दायाँ, बायाँ र बिच, नजिक र टाढा सबै छुट्याउन सकेमा।</td>
+                    </tr>
+                    <tr data-pts="3">
+                        <td><strong>३ अङ्क</strong></td>
+                        <td>पाँचमध्ये कुनै तीनओटा स्थानिक अवधारणा छुट्याउन सकेमा।</td>
+                    </tr>
+                    <tr data-pts="2">
+                        <td><strong>२ अङ्क</strong></td>
+                        <td>पाँचमध्ये कुनै दुईओटा स्थानिक अवधारणा छुट्याउन सकेमा।</td>
+                    </tr>
+                    <tr data-pts="1">
+                        <td><strong>१ अङ्क</strong></td>
+                        <td>पाँचमध्ये कुनै एउटा स्थानिक अवधारणा छुट्याउन सकेमा।</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <button class="tactile-btn btn-next" id="restartBtn" style="font-size: 1.18rem; padding: 13px 28px;">
+            फेरि खेल्नुहोस् 🔄
+        </button>
+    </div>
+</div>
+
+<script>
+    /**
+     * =========================================================================
+     * स्थानिक ज्ञान खेल (SPATIAL EXPLORER) - LARGE SVG & NEPALI SPEECH READER
+     * =========================================================================
+     */
+
+    function toNepaliNum(val) {
+        const digits = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
+        return String(val).replace(/[0-9]/g, d => digits[Number(d)]);
+    }
+
+    // =========================================================================
+    // 1. MULTI-TIER NEPALI AUDIO READER + SOUND EFFECTS ENGINE
+    // =========================================================================
+    class NepaliAudioReader {
+        constructor() {
+            this.autoRead = true;
+            this.ctx = null;
+            this.karaokeTimer = null;
+            this.selectedVoice = null;
+
+            if ('speechSynthesis' in window) {
+                const loadVoices = () => {
+                    const voices = window.speechSynthesis.getVoices();
+                    // Prefer Nepali (ne-NP) first, then Hindi/Devanagari (hi-IN) which pronounces Devanagari accurately
+                    this.selectedVoice =
+                        voices.find(v => v.lang && v.lang.toLowerCase().startsWith('ne')) ||
+                        voices.find(v => v.lang && v.lang.toLowerCase().startsWith('hi')) ||
+                        voices.find(v => v.name && /nepali|hindi|devanagari|google/i.test(v.name)) ||
+                        null;
+                };
+                loadVoices();
+                window.speechSynthesis.onvoiceschanged = loadVoices;
+            }
+        }
+
+        ensureAudioCtx() {
+            if (!this.ctx) {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (AudioCtx) this.ctx = new AudioCtx();
+            }
+            if (this.ctx && this.ctx.state === 'suspended') {
+                this.ctx.resume();
+            }
+        }
+
+        stopSpeaking() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+            if (this.karaokeTimer) {
+                clearInterval(this.karaokeTimer);
+                this.karaokeTimer = null;
+            }
+            const btn = document.getElementById('readQuestionBtn');
+            if (btn) btn.classList.remove('is-speaking');
+            document.querySelectorAll('.q-word').forEach(w => w.classList.remove('speaking'));
+        }
+
+        // Speak Nepali text aloud + highlight words smoothly in sync
+        speakNepali(text, highlightWords = false) {
+            this.stopSpeaking();
+
+            // Strip English parenthetical hints so TTS reads pure, natural Nepali
+            const cleanNepaliText = text.replace(/\([A-Za-z\s]+\)/g, '').replace(/\s+/g, ' ').trim();
+
+            const btn = document.getElementById('readQuestionBtn');
+            const wordSpans = highlightWords ? Array.from(document.querySelectorAll('.q-word')) : [];
+
+            if (highlightWords && btn) {
+                btn.classList.add('is-speaking');
+            }
+
+            // Visual Karaoke Word-by-Word Highlighting (Guaranteed feedback even if OS lacks Nepali voice)
+            let wordIdx = 0;
+            if (wordSpans.length > 0) {
+                wordSpans[0].classList.add('speaking');
+                this.karaokeTimer = setInterval(() => {
+                    wordSpans.forEach(w => w.classList.remove('speaking'));
+                    wordIdx++;
+                    if (wordIdx < wordSpans.length) {
+                        wordSpans[wordIdx].classList.add('speaking');
+                    } else {
+                        clearInterval(this.karaokeTimer);
+                        this.karaokeTimer = null;
+                        if (btn) btn.classList.remove('is-speaking');
+                    }
+                }, 420);
+            }
+
+            // Web Speech API Synthesis
+            if ('speechSynthesis' in window) {
+                try {
+                    const utterance = new SpeechSynthesisUtterance(cleanNepaliText);
+                    if (this.selectedVoice) {
+                        utterance.voice = this.selectedVoice;
+                        utterance.lang = this.selectedVoice.lang;
+                    } else {
+                        utterance.lang = 'ne-NP';
+                    }
+                    utterance.rate = 0.90;  // Clear, gentle pace for young learners
+                    utterance.pitch = 1.08; // Friendly, warm tone
+
+                    utterance.onend = () => {
+                        if (this.karaokeTimer) {
+                            clearInterval(this.karaokeTimer);
+                            this.karaokeTimer = null;
+                        }
+                        wordSpans.forEach(w => w.classList.remove('speaking'));
+                        if (btn) btn.classList.remove('is-speaking');
+                    };
+
+                    utterance.onerror = () => {
+                        // Keep karaoke highlight finishing gracefully
+                    };
+
+                    window.speechSynthesis.speak(utterance);
+                } catch (e) {}
+            }
+        }
+
+        playTone(freqs, duration = 0.35, step = 0.08, type = 'triangle') {
+            try {
+                this.ensureAudioCtx();
+                if (!this.ctx) return;
+                const t = this.ctx.currentTime;
+                freqs.forEach((freq, i) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, t + i * step);
+                    gain.gain.setValueAtTime(0.18, t + i * step);
+                    gain.gain.exponentialRampToValueAtTime(0.001, t + i * step + duration);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(t + i * step);
+                    osc.stop(t + i * step + duration + 0.02);
+                });
+            } catch (e) {}
+        }
+
+        playSuccess() {
+            this.playTone([523.25, 659.25, 783.99, 1046.5], 0.35, 0.08, 'triangle');
+        }
+
+        playError() {
+            this.playTone([230, 175], 0.28, 0.12, 'sine');
+        }
+
+        playHint() {
+            this.playTone([880, 1108], 0.25, 0.09, 'sine');
+        }
+
+        playFanfare() {
+            this.playTone([523.25, 659.25, 783.99, 659.25, 1046.5], 0.45, 0.12, 'triangle');
+        }
+    }
+
+    const reader = new NepaliAudioReader();
+
+    // =========================================================================
+    // 2. LARGE, BOLD SVG ARTWORK PRIMITIVES (900 x 440 ViewBox)
+    // =========================================================================
+    function svgPillLabel(cx, cy, text, isLandmark = false) {
+        const width = Math.max(92, text.length * 14 + 30);
+        const x = cx - width / 2;
+        const fill = isLandmark ? '#fef08a' : '#ffffff';
+        const stroke = isLandmark ? '#ca8a04' : '#1e293b';
+        const textColor = isLandmark ? '#713f12' : '#0f172a';
+        return `
+            <g pointer-events="none">
+                <rect x="${x + 2}" y="${cy - 16 + 4}" width="${width}" height="32" rx="16" fill="rgba(15,23,42,0.22)"/>
+                <rect x="${x}" y="${cy - 16}" width="${width}" height="32" rx="16" fill="${fill}" stroke="${stroke}" stroke-width="3"/>
+                <text x="${cx}" y="${cy + 7}" text-anchor="middle" font-family="'Mukta', 'Noto Sans Devanagari', sans-serif" font-size="20" font-weight="800" fill="${textColor}">${text}</text>
+            </g>
+        `;
+    }
+
+    // Large Shiny Red Apple (स्याउ)
+    function drawApple(cx, cy, scale = 1.25, label = 'स्याउ', labelOffsetY = 58) {
+        return `
+            <g transform="translate(${cx}, ${cy}) scale(${scale})">
+                <ellipse cx="0" cy="28" rx="24" ry="7" fill="rgba(0,0,0,0.2)"/>
+                <path d="M0,-18 C-17,-25 -32,-10 -28,11 C-24,26 -11,32 0,28 C11,32 24,26 28,11 C32,-10 17,-25 0,-18 Z"
+                      fill="#ef4444" stroke="#7f1d1d" stroke-width="3.5"/>
+                <path d="M-16,-8 C-18,-1 -15,6 -11,10" fill="none" stroke="#fecaca" stroke-width="4" stroke-linecap="round"/>
+                <path d="M0,-17 Q2,-29 7,-33" fill="none" stroke="#78350f" stroke-width="4.5" stroke-linecap="round"/>
+                <path d="M2,-25 Q18,-34 24,-23 Q13,-15 2,-25 Z" fill="#22c55e" stroke="#14532d" stroke-width="2.5"/>
+            </g>
+            ${label ? svgPillLabel(cx, cy + labelOffsetY, label) : ''}
+        `;
+    }
+
+    // Large Football (भकुन्डो)
+    function drawBall(cx, cy, scale = 1.25, label = 'भकुन्डो', labelOffsetY = 60) {
+        return `
+            <g transform="translate(${cx}, ${cy}) scale(${scale})">
+                <ellipse cx="0" cy="31" rx="26" ry="8" fill="rgba(0,0,0,0.22)"/>
+                <circle cx="0" cy="0" r="30" fill="#ffffff" stroke="#0f172a" stroke-width="3.5"/>
+                <polygon points="0,-12 11,-3 7,10 -7,10 -11,-3" fill="#1e293b"/>
+                <polygon points="0,-30 9,-22 0,-16 -9,-22" fill="#1e293b"/>
+                <polygon points="27,-9 24,5 14,2 15,-11" fill="#1e293b"/>
+                <polygon points="-27,-9 -24,5 -14,2 -15,-11" fill="#1e293b"/>
+                <polygon points="16,25 5,28 6,16 17,14" fill="#1e293b"/>
+                <polygon points="-16,25 -5,28 -6,16 -17,14" fill="#1e293b"/>
+            </g>
+            ${label ? svgPillLabel(cx, cy + labelOffsetY, label) : ''}
+        `;
+    }
+
+    // Large Storybook + Pencil (किताब)
+    function drawBook(cx, cy, scale = 1.25, label = 'किताब', labelOffsetY = -56) {
+        return `
+            <g transform="translate(${cx}, ${cy}) scale(${scale})">
+                <ellipse cx="0" cy="24" rx="38" ry="7" fill="rgba(0,0,0,0.22)"/>
+                <polygon points="-40,6 0,21 40,6 40,17 0,32 -40,17" fill="#1d4ed8" stroke="#1e3a8a" stroke-width="3" stroke-linejoin="round"/>
+                <polygon points="-36,2 0,16 36,2 36,12 0,26 -36,12" fill="#f8fafc" stroke="#475569" stroke-width="2" stroke-linejoin="round"/>
+                <polygon points="-40,-7 0,-22 40,-7 0,8" fill="#3b82f6" stroke="#1e3a8a" stroke-width="3" stroke-linejoin="round"/>
+                <polygon points="-12,-7 0,-13 12,-7 0,-1" fill="#fde047"/>
+            </g>
+            ${label ? svgPillLabel(cx, cy + labelOffsetY, label) : ''}
+        `;
+    }
+
+    // Large Pair of Shoes (जुत्ता)
+    function drawShoes(cx, cy, scale = 1.25, label = 'जुत्ता', labelOffsetY = 52) {
+        return `
+            <g transform="translate(${cx}, ${cy}) scale(${scale})">
+                <ellipse cx="0" cy="23" rx="44" ry="8" fill="rgba(0,0,0,0.24)"/>
+                <g transform="translate(-20, 0)">
+                    <path d="M-18,15 L20,15 C24,15 26,8 20,4 L5,-5 L-7,-14 L-18,-7 Z" fill="#f97316" stroke="#7c2d12" stroke-width="3" stroke-linejoin="round"/>
+                    <rect x="-18" y="13" width="42" height="7" rx="3.5" fill="#ffffff" stroke="#1e293b" stroke-width="2.2"/>
+                    <line x1="2" y1="-2" x2="9" y2="2" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+                </g>
+                <g transform="translate(20, 4)">
+                    <path d="M-18,15 L20,15 C24,15 26,8 20,4 L5,-5 L-7,-14 L-18,-7 Z" fill="#fb923c" stroke="#7c2d12" stroke-width="3" stroke-linejoin="round"/>
+                    <rect x="-18" y="13" width="42" height="7" rx="3.5" fill="#ffffff" stroke="#1e293b" stroke-width="2.2"/>
+                    <line x1="2" y1="-2" x2="9" y2="2" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+                </g>
+            </g>
+            ${label ? svgPillLabel(cx, cy + labelOffsetY, label) : ''}
+        `;
+    }
+
+    // Large Happy Brown Dog (कुकुर)
+    function drawDog(cx, cy, scale = 1.28, label = 'कुकुर', labelOffsetY = 76) {
+        return `
+            <g transform="translate(${cx}, ${cy}) scale(${scale})">
+                <ellipse cx="0" cy="45" rx="35" ry="10" fill="rgba(0,0,0,0.24)"/>
+                <path d="M23,16 Q40,1 35,-10" fill="none" stroke="#b45309" stroke-width="8" stroke-linecap="round"/>
+                <rect x="-22" y="2" width="46" height="34" rx="16" fill="#d97706" stroke="#78350f" stroke-width="3.5"/>
+                <rect x="-15" y="27" width="11" height="19" rx="5" fill="#b45309" stroke="#78350f" stroke-width="3"/>
+                <rect x="9" y="27" width="11" height="19" rx="5" fill="#b45309" stroke="#78350f" stroke-width="3"/>
+                <circle cx="-12" cy="-15" r="24" fill="#f59e0b" stroke="#78350f" stroke-width="3.5"/>
+                <ellipse cx="-34" cy="-12" rx="8" ry="16" transform="rotate(15 -34 -12)" fill="#78350f"/>
+                <ellipse cx="10" cy="-12" rx="8" ry="16" transform="rotate(-15 10 -12)" fill="#78350f"/>
+                <rect x="-26" y="4" width="28" height="7" rx="3.5" fill="#ef4444" stroke="#7f1d1d" stroke-width="2"/>
+                <circle cx="-20" cy="-19" r="3.5" fill="#0f172a"/>
+                <circle cx="-5" cy="-19" r="3.5" fill="#0f172a"/>
+                <ellipse cx="-12" cy="-9" rx="10" ry="7.5" fill="#fef3c7"/>
+                <circle cx="-12" cy="-12" r="4" fill="#0f172a"/>
+                <path d="M-17,-6 Q-12,-1 -7,-6" fill="none" stroke="#0f172a" stroke-width="2.5" stroke-linecap="round"/>
+            </g>
+            ${label ? svgPillLabel(cx, cy + labelOffsetY, label) : ''}
+        `;
+    }
+
+    // Large Orange Cat Peeking (बिरालो)
+    function drawCat(cx, cy, scale = 1.2, label = 'बिरालो', labelOffsetY = -68) {
+        return `
+            <g transform="translate(${cx}, ${cy}) scale(${scale})">
+                <ellipse cx="0" cy="40" rx="28" ry="8" fill="rgba(0,0,0,0.22)"/>
+                <path d="M18,22 Q38,16 34,-2" fill="none" stroke="#ea580c" stroke-width="7" stroke-linecap="round"/>
+                <ellipse cx="0" cy="15" rx="22" ry="24" fill="#fb923c" stroke="#7c2d12" stroke-width="3.5"/>
+                <circle cx="0" cy="-15" r="21" fill="#fdba74" stroke="#7c2d12" stroke-width="3.5"/>
+                <polygon points="-19,-25 -15,-43 -3,-32" fill="#fb923c" stroke="#7c2d12" stroke-width="3" stroke-linejoin="round"/>
+                <polygon points="19,-25 15,-43 3,-32" fill="#fb923c" stroke="#7c2d12" stroke-width="3" stroke-linejoin="round"/>
+                <circle cx="-8" cy="-17" r="3.2" fill="#0f172a"/>
+                <circle cx="8" cy="-17" r="3.2" fill="#0f172a"/>
+                <polygon points="-4,-11 4,-11 0,-6" fill="#e11d48"/>
+                <line x1="-26" y1="-12" x2="-12" y2="-11" stroke="#431407" stroke-width="2"/>
+                <line x1="-26" y1="-6" x2="-12" y2="-8" stroke="#431407" stroke-width="2"/>
+                <line x1="26" y1="-12" x2="12" y2="-11" stroke="#431407" stroke-width="2"/>
+                <line x1="26" y1="-6" x2="12" y2="-8" stroke="#431407" stroke-width="2"/>
+            </g>
+            ${label ? svgPillLabel(cx + 22, cy + labelOffsetY, label) : ''}
+        `;
+    }
+
+    // Large Yellow Banana (केरा)
+    function drawBanana(cx, cy, scale = 1.35, label = 'केरा', labelOffsetY = 64) {
+        return `
+            <g transform="translate(${cx}, ${cy}) scale(${scale})">
+                <ellipse cx="0" cy="31" rx="30" ry="7" fill="rgba(0,0,0,0.2)"/>
+                <path d="M-26,-19 C-28,13 -4,32 30,17 C13,15 -6,4 -15,-22 Z"
+                      fill="#facc15" stroke="#854d0e" stroke-width="3.5" stroke-linejoin="round"/>
+                <path d="M-19,-11 C-17,9 -2,19 20,15" fill="none" stroke="#fef9c3" stroke-width="3.5" stroke-linecap="round"/>
+                <rect x="-28" y="-25" width="9" height="8" rx="2" transform="rotate(-15 -23 -21)" fill="#78350f"/>
+            </g>
+            ${label ? svgPillLabel(cx, cy + labelOffsetY, label) : ''}
+        `;
+    }
+
+    // Large Orange Fruit (सुन्तला)
+    function drawOrange(cx, cy, scale = 1.35, label = 'सुन्तला', labelOffsetY = 64) {
+        return `
+            <g transform="translate(${cx}, ${cy}) scale(${scale})">
+                <ellipse cx="0" cy="30" rx="24" ry="7" fill="rgba(0,0,0,0.2)"/>
+                <circle cx="0" cy="2" r="26" fill="#f97316" stroke="#7c2d12" stroke-width="3.5"/>
+                <circle cx="-9" cy="-7" r="2.2" fill="#fed7aa"/>
+                <circle cx="-13" cy="4" r="2" fill="#fed7aa"/>
+                <circle cx="-4" cy="11" r="2" fill="#fed7aa"/>
+                <path d="M0,-24 Q13,-35 20,-24 Q9,-17 0,-24 Z" fill="#16a34a" stroke="#14532d" stroke-width="2.5"/>
+            </g>
+            ${label ? svgPillLabel(cx, cy + labelOffsetY, label) : ''}
+        `;
+    }
+
+    // Large White Rabbit (खरायो)
+    function drawRabbit(cx, cy, scale = 1.4, label = 'खरायो', labelOffsetY = 82) {
+        return `
+            <g transform="translate(${cx}, ${cy}) scale(${scale})">
+                <ellipse cx="0" cy="47" rx="30" ry="9" fill="rgba(0,0,0,0.24)"/>
+                <ellipse cx="-11" cy="-44" rx="8" ry="24" transform="rotate(-8 -11 -44)" fill="#ffffff" stroke="#1e293b" stroke-width="3.5"/>
+                <ellipse cx="-11" cy="-44" rx="4" ry="16" transform="rotate(-8 -11 -44)" fill="#fda4af"/>
+                <ellipse cx="11" cy="-44" rx="8" ry="24" transform="rotate(8 11 -44)" fill="#ffffff" stroke="#1e293b" stroke-width="3.5"/>
+                <ellipse cx="11" cy="-44" rx="4" ry="16" transform="rotate(8 11 -44)" fill="#fda4af"/>
+                <ellipse cx="0" cy="19" rx="24" ry="26" fill="#ffffff" stroke="#1e293b" stroke-width="3.5"/>
+                <ellipse cx="0" cy="21" rx="13" ry="17" fill="#fce7f3"/>
+                <ellipse cx="-13" cy="43" rx="11" ry="6.5" fill="#ffffff" stroke="#1e293b" stroke-width="3"/>
+                <ellipse cx="13" cy="43" rx="11" ry="6.5" fill="#ffffff" stroke="#1e293b" stroke-width="3"/>
+                <circle cx="0" cy="-13" r="22" fill="#ffffff" stroke="#1e293b" stroke-width="3.5"/>
+                <circle cx="-8" cy="-16" r="3.2" fill="#0f172a"/>
+                <circle cx="8" cy="-16" r="3.2" fill="#0f172a"/>
+                <circle cx="0" cy="-9" r="4" fill="#f43f5e"/>
+                <path d="M-6,-4 Q0,1 6,-4" fill="none" stroke="#1e293b" stroke-width="2.5" stroke-linecap="round"/>
+            </g>
+            ${label ? svgPillLabel(cx, cy + labelOffsetY, label) : ''}
+        `;
+    }
+
+    // Large Cottage House (घर)
+    function drawHouse(cx, cy, scale = 1.65, label = 'घर', labelOffsetY = -108) {
+        return `
+            <g transform="translate(${cx}, ${cy}) scale(${scale})">
+                <ellipse cx="0" cy="54" rx="72" ry="13" fill="rgba(0,0,0,0.22)"/>
+                <rect x="-56" y="-10" width="112" height="64" rx="4" fill="#fef3c7" stroke="#78350f" stroke-width="3.5"/>
+                <polygon points="-70,-8 0,-60 70,-8" fill="#dc2626" stroke="#7f1d1d" stroke-width="3.5" stroke-linejoin="round"/>
+                <rect x="-15" y="14" width="30" height="40" rx="4" fill="#92400e" stroke="#451a03" stroke-width="3"/>
+                <circle cx="9" cy="35" r="3" fill="#fde047"/>
+                <rect x="-44" y="8" width="22" height="22" rx="3" fill="#bae6fd" stroke="#1e3a8a" stroke-width="2.5"/>
+                <rect x="22" y="8" width="22" height="22" rx="3" fill="#bae6fd" stroke="#1e3a8a" stroke-width="2.5"/>
+            </g>
+            ${label ? svgPillLabel(cx, cy + labelOffsetY, label, true) : ''}
+        `;
+    }
+
+    // Wall Clock (घडी) & Flower Pot (गमला) for Level 4 Shelf
+    function drawClock(cx, cy, scale = 1.2, label = 'घडी', labelOffsetY = -56) {
+        return `
+            <g transform="translate(${cx}, ${cy}) scale(${scale})">
+                <circle cx="0" cy="0" r="30" fill="#fde047" stroke="#854d0e" stroke-width="4"/>
+                <circle cx="0" cy="0" r="23" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+                <line x1="0" y1="0" x2="0" y2="-14" stroke="#0f172a" stroke-width="3.5" stroke-linecap="round"/>
+                <line x1="0" y1="0" x2="11" y2="5" stroke="#dc2626" stroke-width="3" stroke-linecap="round"/>
+                <circle cx="0" cy="0" r="3" fill="#0f172a"/>
+            </g>
+            ${label ? svgPillLabel(cx, cy + labelOffsetY, label) : ''}
+        `;
+    }
+
+    function drawFlowerPot(cx, cy, scale = 1.2, label = 'गमला', labelOffsetY = -62) {
+        return `
+            <g transform="translate(${cx}, ${cy}) scale(${scale})">
+                <line x1="0" y1="0" x2="0" y2="-22" stroke="#16a34a" stroke-width="4"/>
+                <ellipse cx="-10" cy="-12" rx="9" ry="5" transform="rotate(-25 -10 -12)" fill="#22c55e"/>
+                <ellipse cx="10" cy="-12" rx="9" ry="5" transform="rotate(25 10 -12)" fill="#22c55e"/>
+                <circle cx="0" cy="-26" r="11" fill="#ec4899" stroke="#831843" stroke-width="2.5"/>
+                <circle cx="0" cy="-26" r="4.5" fill="#fde047"/>
+                <polygon points="-20,0 20,0 15,28 -15,28" fill="#ea580c" stroke="#7c2d12" stroke-width="3" stroke-linejoin="round"/>
+                <rect x="-23" y="-4" width="46" height="8" rx="3" fill="#f97316" stroke="#7c2d12" stroke-width="2.5"/>
+            </g>
+            ${label ? svgPillLabel(cx, cy + labelOffsetY, label) : ''}
+        `;
+    }
+
+    // =========================================================================
+    // 3. CURRICULUM ROUNDS (10 CLEAR, LARGE-SCALE SCENES ACROSS 4 RUBRIC STAGES)
+    // =========================================================================
+    const ROUNDS = [
+        // ---------------------------------------------------------------------
+        // STAGE 1 (चरण १ - १ अङ्क): भित्र र बाहिर (Inside & Outside)
+        // ---------------------------------------------------------------------
+        {
+            id: 1,
+            stage: 1,
+            points: 1,
+            conceptKey: 'inside_outside',
+            badgeText: 'चरण १ (१ अङ्क) • भित्र र बाहिर',
+            question: 'टोकरीको भित्र रहेको स्याउमा क्लिक गर्नुहोस्।',
+            renderScene() {
+                return `
+                <svg viewBox="0 0 900 440" preserveAspectRatio="xMidYMid slice">
+                    <!-- Bright Sunny Meadow -->
+                    <rect width="900" height="275" fill="#bae6fd"/>
+                    <circle cx="810" cy="68" r="38" fill="#fde047" stroke="#f59e0b" stroke-width="4"/>
+                    <rect y="275" width="900" height="165" fill="#86efac"/>
+                    <line x1="0" y1="275" x2="900" y2="275" stroke="#16a34a" stroke-width="5"/>
+
+                    <!-- HUGE OPEN WOVEN BASKET ON LEFT (Back Interior Bowl) -->
+                    <g id="refLandmark">
+                        <ellipse cx="300" cy="366" rx="135" ry="22" fill="rgba(0,0,0,0.22)"/>
+                        <path d="M180,225 L420,225 L390,358 Q300,382 210,358 Z" fill="#78350f" stroke="#451a03" stroke-width="5"/>
+                        <ellipse cx="300" cy="225" rx="120" ry="28" fill="#451a03" stroke="#78350f" stroke-width="5"/>
+                    </g>
+
+                    <!-- CORRECT OBJECT: Large Red Apple nestled clearly INSIDE the basket -->
+                    <g class="clickable-obj" data-correct="true" tabindex="0" role="button" aria-label="स्याउ">
+                        ${drawApple(300, 218, 1.32, '', 0)}
+                    </g>
+
+                    <!-- Basket Front Woven Wall & Thick Rim Lip (Creates unmistakable INSIDE depth) -->
+                    <g pointer-events="none">
+                        <path d="M180,225 Q300,255 420,225 L390,358 Q300,382 210,358 Z"
+                              fill="#d97706" fill-opacity="0.9" stroke="#78350f" stroke-width="5" stroke-linejoin="round"/>
+                        <path d="M192,265 Q300,292 408,265 M202,310 Q300,335 398,310"
+                              fill="none" stroke="#92400e" stroke-width="4" stroke-dasharray="16 10"/>
+                        <path d="M176,225 Q300,258 424,225" fill="none" stroke="#fbbf24" stroke-width="11" stroke-linecap="round"/>
+                        ${svgPillLabel(300, 404, 'टोकरी', true)}
+                        ${svgPillLabel(300, 152, 'स्याउ (भित्र)', false)}
+                    </g>
+
+                    <!-- DISTRACTOR OBJECT: Large Football sitting clearly OUTSIDE on the grass -->
+                    <g class="clickable-obj" data-correct="false" tabindex="0" role="button" aria-label="भकुन्डो">
+                        ${drawBall(675, 310, 1.35, 'भकुन्डो (बाहिर)', 66)}
+                    </g>
+                </svg>`;
+            }
+        },
+        {
+            id: 2,
+            stage: 1,
+            points: 1,
+            conceptKey: 'inside_outside',
+            badgeText: 'चरण १ (१ अङ्क) • भित्र र बाहिर',
+            question: 'अब टोकरीको बाहिर घाँसमा रहेको भकुन्डोमा क्लिक गर्नुहोस्।',
+            renderScene() {
+                return `
+                <svg viewBox="0 0 900 440" preserveAspectRatio="xMidYMid slice">
+                    <rect width="900" height="275" fill="#bae6fd"/>
+                    <circle cx="810" cy="68" r="38" fill="#fde047" stroke="#f59e0b" stroke-width="4"/>
+                    <rect y="275" width="900" height="165" fill="#86efac"/>
+                    <line x1="0" y1="275" x2="900" y2="275" stroke="#16a34a" stroke-width="5"/>
+
+                    <g id="refLandmark">
+                        <ellipse cx="300" cy="366" rx="135" ry="22" fill="rgba(0,0,0,0.22)"/>
+                        <path d="M180,225 L420,225 L390,358 Q300,382 210,358 Z" fill="#78350f" stroke="#451a03" stroke-width="5"/>
+                        <ellipse cx="300" cy="225" rx="120" ry="28" fill="#451a03" stroke="#78350f" stroke-width="5"/>
+                    </g>
+
+                    <!-- DISTRACTOR: Apple inside -->
+                    <g class="clickable-obj" data-correct="false" tabindex="0" role="button" aria-label="स्याउ">
+                        ${drawApple(300, 218, 1.32, '', 0)}
+                    </g>
+
+                    <g pointer-events="none">
+                        <path d="M180,225 Q300,255 420,225 L390,358 Q300,382 210,358 Z"
+                              fill="#d97706" fill-opacity="0.9" stroke="#78350f" stroke-width="5" stroke-linejoin="round"/>
+                        <path d="M192,265 Q300,292 408,265 M202,310 Q300,335 398,310"
+                              fill="none" stroke="#92400e" stroke-width="4" stroke-dasharray="16 10"/>
+                        <path d="M176,225 Q300,258 424,225" fill="none" stroke="#fbbf24" stroke-width="11" stroke-linecap="round"/>
+                        ${svgPillLabel(300, 404, 'टोकरी', true)}
+                        ${svgPillLabel(300, 152, 'स्याउ', false)}
+                    </g>
+
+                    <!-- CORRECT: Football outside -->
+                    <g class="clickable-obj" data-correct="true" tabindex="0" role="button" aria-label="भकुन्डो">
+                        ${drawBall(675, 310, 1.35, 'भकुन्डो', 66)}
+                    </g>
+                </svg>`;
+            }
+        },
+
+        // ---------------------------------------------------------------------
+        // STAGE 1 (चरण १ - १ अङ्क): माथि र तल (Above & Below)
+        // ---------------------------------------------------------------------
+        {
+            id: 3,
+            stage: 1,
+            points: 1,
+            conceptKey: 'above_below',
+            badgeText: 'चरण १ (१ अङ्क) • माथि र तल',
+            question: 'टेबलको माथि राखिएको किताबमा क्लिक गर्नुहोस्।',
+            renderScene() {
+                return `
+                <svg viewBox="0 0 900 440" preserveAspectRatio="xMidYMid slice">
+                    <rect width="900" height="305" fill="#fef9c3"/>
+                    <rect y="305" width="900" height="135" fill="#e2e8f0"/>
+                    <line x1="0" y1="305" x2="900" y2="305" stroke="#94a3b8" stroke-width="5"/>
+
+                    <!-- LARGE WOODEN TABLE -->
+                    <g id="refLandmark">
+                        <rect x="295" y="215" width="20" height="120" fill="#78350f" stroke="#451a03" stroke-width="3"/>
+                        <rect x="585" y="215" width="20" height="120" fill="#78350f" stroke="#451a03" stroke-width="3"/>
+                        <rect x="255" y="220" width="24" height="145" rx="4" fill="#b45309" stroke="#451a03" stroke-width="3.5"/>
+                        <rect x="621" y="220" width="24" height="145" rx="4" fill="#b45309" stroke="#451a03" stroke-width="3.5"/>
+                        <rect x="225" y="196" width="450" height="28" rx="10" fill="#d97706" stroke="#78350f" stroke-width="4"/>
+                        ${svgPillLabel(450, 256, 'टेबल', true)}
+                    </g>
+
+                    <!-- CORRECT: Large Blue Book ON TOP of the table -->
+                    <g class="clickable-obj" data-correct="true" tabindex="0" role="button" aria-label="किताब">
+                        ${drawBook(450, 168, 1.35, 'किताब', -54)}
+                    </g>
+
+                    <!-- DISTRACTOR: Large Sneakers UNDERNEATH the table -->
+                    <g class="clickable-obj" data-correct="false" tabindex="0" role="button" aria-label="जुत्ता">
+                        ${drawShoes(450, 338, 1.3, 'जुत्ता', 54)}
+                    </g>
+                </svg>`;
+            }
+        },
+        {
+            id: 4,
+            stage: 1,
+            points: 1,
+            conceptKey: 'above_below',
+            badgeText: 'चरण १ (१ अङ्क) • माथि र तल',
+            question: 'टेबलको तल राखिएको जुत्तामा क्लिक गर्नुहोस्।',
+            renderScene() {
+                return `
+                <svg viewBox="0 0 900 440" preserveAspectRatio="xMidYMid slice">
+                    <rect width="900" height="305" fill="#f3e8ff"/>
+                    <rect y="305" width="900" height="135" fill="#e2e8f0"/>
+                    <line x1="0" y1="305" x2="900" y2="305" stroke="#94a3b8" stroke-width="5"/>
+
+                    <g id="refLandmark">
+                        <rect x="295" y="215" width="20" height="120" fill="#78350f" stroke="#451a03" stroke-width="3"/>
+                        <rect x="585" y="215" width="20" height="120" fill="#78350f" stroke="#451a03" stroke-width="3"/>
+                        <rect x="255" y="220" width="24" height="145" rx="4" fill="#b45309" stroke="#451a03" stroke-width="3.5"/>
+                        <rect x="621" y="220" width="24" height="145" rx="4" fill="#b45309" stroke="#451a03" stroke-width="3.5"/>
+                        <rect x="225" y="196" width="450" height="28" rx="10" fill="#d97706" stroke="#78350f" stroke-width="4"/>
+                        ${svgPillLabel(450, 256, 'टेबल', true)}
+                    </g>
+
+                    <!-- DISTRACTOR: Apple on top -->
+                    <g class="clickable-obj" data-correct="false" tabindex="0" role="button" aria-label="स्याउ">
+                        ${drawApple(450, 160, 1.25, 'स्याउ', -54)}
+                    </g>
+
+                    <!-- CORRECT: Sneakers underneath -->
+                    <g class="clickable-obj" data-correct="true" tabindex="0" role="button" aria-label="जुत्ता">
+                        ${drawShoes(450, 338, 1.3, 'जुत्ता', 54)}
+                    </g>
+                </svg>`;
+            }
+        },
+
+        // ---------------------------------------------------------------------
+        // STAGE 2 (चरण २ - २ अङ्क): अगाडि र पछाडि (In Front & Behind)
+        // ---------------------------------------------------------------------
+        {
+            id: 5,
+            stage: 2,
+            points: 2,
+            conceptKey: 'front_behind',
+            badgeText: 'चरण २ (२ अङ्क) • अगाडि र पछाडि',
+            question: 'घरको अगाडि उभिएको कुकुरमा क्लिक गर्नुहोस्।',
+            renderScene() {
+                return `
+                <svg viewBox="0 0 900 440" preserveAspectRatio="xMidYMid slice">
+                    <rect width="900" height="250" fill="#bae6fd"/>
+                    <rect y="250" width="900" height="190" fill="#4ade80"/>
+                    <line x1="0" y1="250" x2="900" y2="250" stroke="#16a34a" stroke-width="5"/>
+
+                    <!-- DISTRACTOR: Orange Cat hiding BEHIND right corner of house -->
+                    <g class="clickable-obj" data-correct="false" tabindex="0" role="button" aria-label="बिरालो">
+                        ${drawCat(575, 222, 1.18, 'बिरालो', -68)}
+                    </g>
+
+                    <!-- CENTRAL COTTAGE -->
+                    <g id="refLandmark">
+                        ${drawHouse(450, 215, 1.65, 'घर', -112)}
+                    </g>
+
+                    <!-- CORRECT: Large Brown Dog standing directly IN FRONT of house -->
+                    <g class="clickable-obj" data-correct="true" tabindex="0" role="button" aria-label="कुकुर">
+                        ${drawDog(380, 312, 1.32, 'कुकुर', 78)}
+                    </g>
+                </svg>`;
+            }
+        },
+        {
+            id: 6,
+            stage: 2,
+            points: 2,
+            conceptKey: 'front_behind',
+            badgeText: 'चरण २ (२ अङ्क) • अगाडि र पछाडि',
+            question: 'घरको पछाडि लुकेको बिरालोमा क्लिक गर्नुहोस्।',
+            renderScene() {
+                return `
+                <svg viewBox="0 0 900 440" preserveAspectRatio="xMidYMid slice">
+                    <rect width="900" height="250" fill="#bae6fd"/>
+                    <rect y="250" width="900" height="190" fill="#4ade80"/>
+                    <line x1="0" y1="250" x2="900" y2="250" stroke="#16a34a" stroke-width="5"/>
+
+                    <!-- CORRECT: Orange Cat hiding BEHIND house -->
+                    <g class="clickable-obj" data-correct="true" tabindex="0" role="button" aria-label="बिरालो">
+                        ${drawCat(575, 222, 1.18, 'बिरालो', -68)}
+                    </g>
+
+                    <g id="refLandmark">
+                        ${drawHouse(450, 215, 1.65, 'घर', -112)}
+                    </g>
+
+                    <!-- DISTRACTOR: Dog in front -->
+                    <g class="clickable-obj" data-correct="false" tabindex="0" role="button" aria-label="कुकुर">
+                        ${drawDog(380, 312, 1.32, 'कुकुर', 78)}
+                    </g>
+                </svg>`;
+            }
+        },
+
+        // ---------------------------------------------------------------------
+        // STAGE 2 (चरण २ - २ अङ्क): नजिक र टाढा (Near & Far)
+        // ---------------------------------------------------------------------
+        {
+            id: 7,
+            stage: 2,
+            points: 2,
+            conceptKey: 'near_far',
+            badgeText: 'चरण २ (२ अङ्क) • नजिक र टाढा',
+            question: 'तपाईँको नजिक रहेको ठूलो खरायोमा क्लिक गर्नुहोस्।',
+            renderScene() {
+                return `
+                <svg viewBox="0 0 900 440" preserveAspectRatio="xMidYMid slice">
+                    <rect width="900" height="165" fill="#7dd3fc"/>
+                    <path d="M0,165 Q210,95 430,155 Q650,85 900,150 L900,175 L0,175 Z" fill="#4ade80" stroke="#16a34a" stroke-width="4"/>
+                    <rect y="165" width="900" height="275" fill="#86efac"/>
+
+                    <!-- Winding Perspective Path -->
+                    <g id="refLandmark">
+                        <path d="M510,165 C485,205 585,245 475,298 C365,350 230,390 175,440 L565,440 C600,380 550,335 595,285 C640,235 540,200 532,165 Z"
+                              fill="#cbd5e1" stroke="#64748b" stroke-width="3.5"/>
+                        <path d="M521,165 C508,205 590,245 520,298 C450,350 385,390 365,440"
+                              fill="none" stroke="#ffffff" stroke-width="5" stroke-dasharray="16 16"/>
+                    </g>
+
+                    <!-- DISTRACTOR: Tiny House FAR away on distant hill -->
+                    <g class="clickable-obj" data-correct="false" tabindex="0" role="button" aria-label="टाढाको घर">
+                        ${drawHouse(520, 136, 0.52, 'घर (टाढा)', 42)}
+                    </g>
+
+                    <!-- CORRECT: Huge White Rabbit NEAR in the immediate foreground -->
+                    <g class="clickable-obj" data-correct="true" tabindex="0" role="button" aria-label="नजिकको खरायो">
+                        ${drawRabbit(280, 315, 1.48, 'खरायो (नजिक)', 86)}
+                    </g>
+                </svg>`;
+            }
+        },
+        {
+            id: 8,
+            stage: 2,
+            points: 2,
+            conceptKey: 'near_far',
+            badgeText: 'चरण २ (२ अङ्क) • नजिक र टाढा',
+            question: 'टाढा डाँडाको फेदमा रहेको सानो घरमा क्लिक गर्नुहोस्।',
+            renderScene() {
+                return `
+                <svg viewBox="0 0 900 440" preserveAspectRatio="xMidYMid slice">
+                    <rect width="900" height="165" fill="#7dd3fc"/>
+                    <path d="M0,165 Q210,95 430,155 Q650,85 900,150 L900,175 L0,175 Z" fill="#4ade80" stroke="#16a34a" stroke-width="4"/>
+                    <rect y="165" width="900" height="275" fill="#86efac"/>
+
+                    <g id="refLandmark">
+                        <path d="M510,165 C485,205 585,245 475,298 C365,350 230,390 175,440 L565,440 C600,380 550,335 595,285 C640,235 540,200 532,165 Z"
+                              fill="#cbd5e1" stroke="#64748b" stroke-width="3.5"/>
+                        <path d="M521,165 C508,205 590,245 520,298 C450,350 385,390 365,440"
+                              fill="none" stroke="#ffffff" stroke-width="5" stroke-dasharray="16 16"/>
+                    </g>
+
+                    <!-- CORRECT: Distant House FAR away -->
+                    <g class="clickable-obj" data-correct="true" tabindex="0" role="button" aria-label="टाढाको घर">
+                        ${drawHouse(520, 136, 0.52, 'घर (टाढा)', 42)}
+                    </g>
+
+                    <!-- DISTRACTOR: Large Rabbit NEAR -->
+                    <g class="clickable-obj" data-correct="false" tabindex="0" role="button" aria-label="नजिकको खरायो">
+                        ${drawRabbit(280, 315, 1.48, 'खरायो (नजिक)', 86)}
+                    </g>
+                </svg>`;
+            }
+        },
+
+        // ---------------------------------------------------------------------
+        // STAGE 3 (चरण ३ - ३ अङ्क): दायाँ, बायाँ र बिच (Right, Left & Middle)
+        // ---------------------------------------------------------------------
+        {
+            id: 9,
+            stage: 3,
+            points: 3,
+            conceptKey: 'left_middle_right',
+            badgeText: 'चरण ३ (३ अङ्क) • बायाँ, बिच र दायाँ',
+            question: 'बिचमा राखिएको रातो स्याउमा क्लिक गर्नुहोस्।',
+            renderScene() {
+                return `
+                <svg viewBox="0 0 900 440" preserveAspectRatio="xMidYMid slice">
+                    <rect width="900" height="440" fill="#ecfdf5"/>
+
+                    <!-- Clear Directional Guide Badges -->
+                    <g id="refLandmark">
+                        ${svgPillLabel(190, 52, '⬅️ बायाँ (Left)', true)}
+                        ${svgPillLabel(450, 52, 'बिच (Middle)', true)}
+                        ${svgPillLabel(710, 52, 'दायाँ (Right) ➡️', true)}
+                        <!-- Wide Wooden Display Pedestal -->
+                        <rect x="85" y="285" width="730" height="28" rx="10" fill="#d97706" stroke="#78350f" stroke-width="4"/>
+                        <rect x="135" y="313" width="26" height="95" fill="#92400e" stroke="#451a03" stroke-width="3.5"/>
+                        <rect x="739" y="313" width="26" height="95" fill="#92400e" stroke="#451a03" stroke-width="3.5"/>
+                    </g>
+
+                    <!-- LEFT: Large Banana -->
+                    <g class="clickable-obj" data-correct="false" tabindex="0" role="button" aria-label="केरा">
+                        ${drawBanana(190, 242, 1.38, 'केरा', 112)}
+                    </g>
+
+                    <!-- MIDDLE (CORRECT): Large Red Apple -->
+                    <g class="clickable-obj" data-correct="true" tabindex="0" role="button" aria-label="स्याउ">
+                        ${drawApple(450, 242, 1.38, 'स्याउ', 112)}
+                    </g>
+
+                    <!-- RIGHT: Large Orange -->
+                    <g class="clickable-obj" data-correct="false" tabindex="0" role="button" aria-label="सुन्तला">
+                        ${drawOrange(710, 242, 1.38, 'सुन्तला', 112)}
+                    </g>
+                </svg>`;
+            }
+        },
+
+        // ---------------------------------------------------------------------
+        // STAGE 4 (चरण ४ - ४ अङ्क): संयुक्त स्थान चुनौती (Two Clues Combined)
+        // ---------------------------------------------------------------------
+        {
+            id: 10,
+            stage: 4,
+            points: 4,
+            conceptKey: 'combined_mastery',
+            badgeText: 'चरण ४ (४ अङ्क) • संयुक्त स्थान चुनौती',
+            question: 'माथिल्लो तल्लाको बायाँपट्टि राखिएको घडीमा क्लिक गर्नुहोस्।',
+            renderScene() {
+                return `
+                <svg viewBox="0 0 900 440" preserveAspectRatio="xMidYMid slice">
+                    <rect width="900" height="440" fill="#fef3c7"/>
+
+                    <!-- Left & Right Header Guides -->
+                    ${svgPillLabel(280, 38, '⬅️ बायाँ (Left)', true)}
+                    ${svgPillLabel(620, 38, 'दायाँ (Right) ➡️', true)}
+
+                    <!-- Two-Tier Wooden Bookcase / Shelf -->
+                    <g id="refLandmark">
+                        <rect x="130" y="68" width="640" height="340" rx="14" fill="#fde68a" stroke="#78350f" stroke-width="5"/>
+                        <!-- Top Shelf Plank -->
+                        <rect x="130" y="218" width="640" height="22" fill="#b45309" stroke="#78350f" stroke-width="4"/>
+                        <!-- Bottom Shelf Plank -->
+                        <rect x="130" y="386" width="640" height="24" fill="#b45309" stroke="#78350f" stroke-width="4"/>
+                        <!-- Center Divider -->
+                        <rect x="442" y="68" width="16" height="320" fill="#92400e"/>
+                    </g>
+
+                    <!-- TOP-LEFT (CORRECT): Wall Clock -->
+                    <g class="clickable-obj" data-correct="true" tabindex="0" role="button" aria-label="घडी">
+                        ${drawClock(285, 152, 1.25, 'घडी', -54)}
+                    </g>
+
+                    <!-- TOP-RIGHT (DISTRACTOR): Flower Pot -->
+                    <g class="clickable-obj" data-correct="false" tabindex="0" role="button" aria-label="गमला">
+                        ${drawFlowerPot(615, 175, 1.25, 'गमला', -68)}
+                    </g>
+
+                    <!-- BOTTOM-LEFT (DISTRACTOR): Book -->
+                    <g class="clickable-obj" data-correct="false" tabindex="0" role="button" aria-label="किताब">
+                        ${drawBook(285, 342, 1.25, 'किताब', -52)}
+                    </g>
+
+                    <!-- BOTTOM-RIGHT (DISTRACTOR): Ball -->
+                    <g class="clickable-obj" data-correct="false" tabindex="0" role="button" aria-label="भकुन्डो">
+                        ${drawBall(615, 342, 1.2, 'भकुन्डो', -54)}
+                    </g>
+                </svg>`;
+            }
+        }
+    ];
+
+    // =========================================================================
+    // 4. GAME STATE & CONTROLLER
+    // =========================================================================
+    const gameState = {
+        currentIdx: 0,
+        stars: 0,
+        roundSolved: false,
+        masteredConcepts: new Set()
+    };
+
+    const ui = {
+        stageHud: document.getElementById('stageHud'),
+        starHud: document.getElementById('starHud'),
+        autoReadToggle: document.getElementById('autoReadToggle'),
+        questionCounter: document.getElementById('questionCounter'),
+        progressFill: document.getElementById('progressFill'),
+        conceptCounter: document.getElementById('conceptCounter'),
+        conceptBadge: document.getElementById('conceptBadge'),
+        questionHeading: document.getElementById('questionHeading'),
+        readQuestionBtn: document.getElementById('readQuestionBtn'),
+        svgStageFrame: document.getElementById('svgStageFrame'),
+        statusBanner: document.getElementById('statusBanner'),
+        hintBtn: document.getElementById('hintBtn'),
+        nextBtn: document.getElementById('nextBtn'),
+        startModal: document.getElementById('startModal'),
+        reportModal: document.getElementById('reportModal'),
+        startBtn: document.getElementById('startBtn'),
+        restartBtn: document.getElementById('restartBtn'),
+        reportSummaryLine: document.getElementById('reportSummaryLine'),
+        finalPointBadge: document.getElementById('finalPointBadge'),
+        masteryPills: document.getElementById('masteryPills'),
+        rubricTableBody: document.getElementById('rubricTableBody')
+    };
+
+    function computeRubricPoints() {
+        const n = gameState.masteredConcepts.size;
+        if (n >= 5) return 4;
+        if (n >= 3) return 3;
+        if (n === 2) return 2;
+        return 1;
+    }
+
+    function launchConfetti() {
+        const colors = ['#ef4444', '#f59e0b', '#22c55e', '#3b82f6', '#8b5cf6', '#ec4899'];
+        for (let i = 0; i < 28; i++) {
+            const c = document.createElement('div');
+            c.className = 'confetti';
+            c.style.left = (Math.random() * 94) + '%';
+            c.style.top = '0px';
+            c.style.backgroundColor = colors[i % colors.length];
+            c.style.animationDelay = (Math.random() * 0.25) + 's';
+            ui.svgStageFrame.appendChild(c);
+            setTimeout(() => c.remove(), 1900);
+        }
+    }
+
+    // Wrap Nepali words in spans so the reader can highlight each word while speaking
+    function renderKaraokeQuestion(questionText) {
+        const words = questionText.split(' ');
+        ui.questionHeading.innerHTML = words
+            .map(word => `<span class="q-word">${word}</span>`)
+            .join(' ');
+    }
+
+    function renderRound(index, shouldSpeak = true) {
+        const round = ROUNDS[index];
+        gameState.roundSolved = false;
+        reader.stopSpeaking();
+
+        // Update HUD & Progress
+        ui.stageHud.textContent = `चरण ${toNepaliNum(round.stage)} (${toNepaliNum(round.points)} अङ्क)`;
+        ui.questionCounter.textContent = `प्रश्न ${toNepaliNum(index + 1)} / ${toNepaliNum(ROUNDS.length)}`;
+        ui.progressFill.style.width = `${((index + 1) / ROUNDS.length) * 100}%`;
+        ui.conceptCounter.textContent = `अवधारणा: ${toNepaliNum(gameState.masteredConcepts.size)} / ५`;
+
+        // Update Prompt Banner
+        ui.conceptBadge.textContent = round.badgeText;
+        renderKaraokeQuestion(round.question);
+
+        // Reset Feedback & Next Button
+        ui.statusBanner.className = 'feedback-box';
+        ui.statusBanner.textContent = 'चित्रमा सही वस्तु छान्नुहोस्! 👆';
+        ui.nextBtn.disabled = true;
+        ui.nextBtn.innerHTML = (index === ROUNDS.length - 1) ? 'मूल्याङ्कन नतिजा हेर्नुहोस् 🏆' : 'अर्को प्रश्न ➡️';
+
+        // Render Big, Crystal-Clear SVG Scene
+        ui.svgStageFrame.innerHTML = round.renderScene();
+
+        // Bind Interactive Click & Keyboard Handlers
+        ui.svgStageFrame.querySelectorAll('.clickable-obj').forEach(obj => {
+            const handlePick = () => evaluateChoice(obj, round);
+            obj.addEventListener('click', handlePick);
+            obj.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handlePick();
+                }
+            });
+        });
+
+        // Auto-read question in Nepali if enabled & game started
+        if (shouldSpeak && reader.autoRead && ui.startModal.classList.contains('hidden')) {
+            setTimeout(() => reader.speakNepali(round.question, true), 260);
+        }
+    }
+
+    function evaluateChoice(objElement, round) {
+        if (gameState.roundSolved) return;
+
+        objElement.classList.remove('obj-correct', 'obj-wrong');
+        void objElement.offsetWidth;
+
+        const isCorrect = objElement.dataset.correct === 'true';
+
+        if (isCorrect) {
+            gameState.roundSolved = true;
+            objElement.classList.add('obj-correct');
+            reader.playSuccess();
+            launchConfetti();
+
+            gameState.stars += 1;
+            if (round.conceptKey !== 'combined_mastery') {
+                gameState.masteredConcepts.add(round.conceptKey);
+            }
+
+            ui.starHud.textContent = toNepaliNum(gameState.stars);
+            ui.conceptCounter.textContent = `अवधारणा: ${toNepaliNum(gameState.masteredConcepts.size)} / ५`;
+
+            const successMsg = 'स्याबास! बिल्कुल सही जवाफ!';
+            ui.statusBanner.className = 'feedback-box success';
+            ui.statusBanner.textContent = successMsg + ' 🌟';
+            ui.nextBtn.disabled = false;
+
+            if (reader.autoRead) {
+                setTimeout(() => reader.speakNepali(successMsg, false), 350);
+            }
+        } else {
+            objElement.classList.add('obj-wrong');
+            reader.playError();
+
+            const retryMsg = 'मिलेन! चित्र राम्ररी हेरेर फेरि प्रयास गर्नुहोस्।';
+            ui.statusBanner.className = 'feedback-box error';
+            ui.statusBanner.textContent = retryMsg + ' 🤔';
+
+            if (reader.autoRead) {
+                setTimeout(() => reader.speakNepali(retryMsg, false), 250);
+            }
+        }
+    }
+
+    function triggerLandmarkHint() {
+        reader.playHint();
+        const landmark = ui.svgStageFrame.querySelector('#refLandmark');
+        if (landmark) {
+            landmark.classList.remove('landmark-hint-active');
+            void landmark.offsetWidth;
+            landmark.classList.add('landmark-hint-active');
+        }
+        if (!gameState.roundSolved) {
+            const hintMsg = 'संकेत: चम्किएको मुख्य वस्तुको स्थान हेर्नुहोस्!';
+            ui.statusBanner.className = 'feedback-box';
+            ui.statusBanner.textContent = hintMsg + ' 💡';
+            if (reader.autoRead) {
+                reader.speakNepali(hintMsg, false);
+            }
+        }
+    }
+
+    function openReportCard() {
+        reader.stopSpeaking();
+        reader.playFanfare();
+        const earnedPts = computeRubricPoints();
+        const masteredCount = gameState.masteredConcepts.size;
+
+        ui.reportSummaryLine.innerHTML = `
+            तपाईँले <strong>${toNepaliNum(ROUNDS.length)}</strong> मध्ये <strong>${toNepaliNum(gameState.stars)}</strong> ताराहरू जित्नुभयो र
+            <strong>५</strong> मध्ये <strong>${toNepaliNum(masteredCount)}</strong> स्थानिक अवधारणाहरू सफलपूर्वक छुट्याउनुभयो।
+        `;
+
+        ui.finalPointBadge.textContent = `प्राप्त अङ्क: ${toNepaliNum(earnedPts)} अङ्क`;
+
+        ui.masteryPills.querySelectorAll('.c-pill').forEach(pill => {
+            const key = pill.dataset.concept;
+            if (gameState.masteredConcepts.has(key)) {
+                pill.classList.add('done');
+                pill.textContent = '✅ ' + pill.textContent.replace(/^✅\s*/, '');
+            } else {
+                pill.classList.remove('done');
+                pill.textContent = pill.textContent.replace(/^✅\s*/, '');
+            }
+        });
+
+        ui.rubricTableBody.querySelectorAll('tr').forEach(row => {
+            row.classList.remove('active-row');
+            if (Number(row.dataset.pts) === earnedPts) {
+                row.classList.add('active-row');
+            }
+        });
+
+        ui.reportModal.classList.remove('hidden');
+
+        if (reader.autoRead) {
+            setTimeout(() => {
+                reader.speakNepali(`बधाई छ! तपाईँले ${toNepaliNum(earnedPts)} अङ्क प्राप्त गर्नुभयो।`, false);
+            }, 650);
+        }
+    }
+
+    function resetAndStart() {
+        reader.ensureAudioCtx();
+        gameState.currentIdx = 0;
+        gameState.stars = 0;
+        gameState.roundSolved = false;
+        gameState.masteredConcepts.clear();
+
+        ui.starHud.textContent = toNepaliNum(0);
+        ui.startModal.classList.add('hidden');
+        ui.reportModal.classList.add('hidden');
+
+        renderRound(0, true);
+    }
+
+    // =========================================================================
+    // 5. EVENT BINDINGS
+    // =========================================================================
+    ui.startBtn.addEventListener('click', resetAndStart);
+    ui.restartBtn.addEventListener('click', resetAndStart);
+    ui.hintBtn.addEventListener('click', triggerLandmarkHint);
+
+    ui.readQuestionBtn.addEventListener('click', () => {
+        reader.ensureAudioCtx();
+        const currentRound = ROUNDS[gameState.currentIdx];
+        if (currentRound) {
+            reader.speakNepali(currentRound.question, true);
+        }
+    });
+
+    ui.autoReadToggle.addEventListener('click', () => {
+        reader.autoRead = !reader.autoRead;
+        if (reader.autoRead) {
+            ui.autoReadToggle.classList.remove('off');
+            ui.autoReadToggle.textContent = '🔊 स्वतः वाचन: चालु';
+            const currentRound = ROUNDS[gameState.currentIdx];
+            if (currentRound && ui.startModal.classList.contains('hidden')) {
+                reader.speakNepali(currentRound.question, true);
+            }
+        } else {
+            reader.stopSpeaking();
+            ui.autoReadToggle.classList.add('off');
+            ui.autoReadToggle.textContent = '🔇 स्वतः वाचन: बन्द';
+        }
+    });
+
+    ui.nextBtn.addEventListener('click', () => {
+        if (gameState.currentIdx < ROUNDS.length - 1) {
+            gameState.currentIdx += 1;
+            renderRound(gameState.currentIdx, true);
+        } else {
+            openReportCard();
+        }
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+        renderRound(0, false);
+    });
+</script>
+</body>
+</html>
